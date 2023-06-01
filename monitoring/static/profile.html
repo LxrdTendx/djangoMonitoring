@@ -1,0 +1,67 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+
+{% block content %}
+  <h2>Welcome, {{ user.username }}!</h2>
+  <a href="{% url 'logout' %}">Logout</a>
+
+  {% for number in floor_numbers %}
+    <button class="floor-button" data-image="{{ number }}.png">{{ number }}</button>
+  {% endfor %}
+
+
+
+  <img id="floor-image" src="" alt="Floor image" style="display: none;">
+  <h3>Add sensor</h3>
+  <form id="sensor-form">
+      <label for="sensor-name">Sensor Name:</label><br>
+      <input type="text" id="sensor-name" name="sensor-name"><br>
+      <label for="sensor-type">Sensor Type:</label><br>
+      <select id="sensor-type" name="sensor-type">
+          <option value="mult">Multi-Sensor</option>
+          <option value="wet">Wet-Sensor</option>
+      </select><br>
+      <label for="sensor-x">X-coordinate:</label><br>
+      <input type="number" id="sensor-x" name="sensor-x" min="0"><br>
+      <label for="sensor-y">Y-coordinate:</label><br>
+      <input type="number" id="sensor-y" name="sensor-y" min="0"><br>
+      <input type="submit" value="Add Sensor">
+  </form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var staticUrl = "{% get_static_prefix %}";
+    var fileNameWithoutFloorAndExtension = "{{ file_name_without_floor_and_extension }}";
+
+    document.querySelectorAll('.floor-button').forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            var imageFile = "объект " + event.target.getAttribute('data-image');
+
+            var imageUrl = staticUrl + "{{ user.username }}/" + imageFile;
+            var imageElement = document.getElementById('floor-image');
+            imageElement.src = imageUrl;
+            imageElement.style.display = 'block';
+        });
+    });
+     document.getElementById('sensor-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var sensorName = event.target['sensor-name'].value;
+        var sensorType = event.target['sensor-type'].value;
+        var sensorX = event.target['sensor-x'].value;
+        var sensorY = event.target['sensor-y'].value;
+
+        var sensorImage = document.createElement('img');
+        sensorImage.src = staticUrl + "sensors/" + sensorType + ".png";
+        sensorImage.style.position = 'absolute';
+        sensorImage.style.left = sensorX + 'px';
+        sensorImage.style.top = sensorY + 'px';
+        sensorImage.alt = sensorName;
+
+        document.getElementById('floor-image').parentElement.appendChild(sensorImage);
+    });
+</script>
+{% endblock %}
+

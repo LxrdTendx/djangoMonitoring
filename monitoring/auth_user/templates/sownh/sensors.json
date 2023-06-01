@@ -1,0 +1,30 @@
+{
+  "объект 01.png": [
+    {
+      "sensor_name": "Sensor1",
+      "x_coordinate": 123,
+      "y_coordinate": 456,
+      "sensor_type": "Temperature"
+    },
+    {
+      "sensor_name": "Sensor2",
+      "x_coordinate": 789,
+      "y_coordinate": 12,
+      "sensor_type": "Humidity"
+    }
+  ],
+  "объект 02.png": [
+    {
+      "sensor_name": "Sensor3",
+      "x_coordinate": 345,
+      "y_coordinate": 678,
+      "sensor_type": "Temperature"
+    },
+    {
+      "sensor_name": "Sensor4",
+      "x_coordinate": 901,
+      "y_coordinate": 234,
+      "sensor_type": "Humidity"
+    }
+  ]
+}
