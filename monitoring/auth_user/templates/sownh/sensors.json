@@ -1,30 +1,42 @@
 {
   "объект 01.png": [
     {
-      "sensor_name": "Sensor1",
-      "x_coordinate": 123,
-      "y_coordinate": 456,
-      "sensor_type": "Temperature"
+      "sensor_name": "test3",
+      "x_coordinate": 220,
+      "y_coordinate": 660,
+      "sensor_type": "mult"
     },
     {
-      "sensor_name": "Sensor2",
-      "x_coordinate": 789,
-      "y_coordinate": 12,
-      "sensor_type": "Humidity"
+      "sensor_name": "test4",
+      "x_coordinate": 551,
+      "y_coordinate": 338,
+      "sensor_type": "mult"
+    },
+    {
+      "sensor_name": "test2",
+      "x_coordinate": 880,
+      "y_coordinate": 86,
+      "sensor_type": "mult"
+    },
+    {
+      "sensor_name": "test1",
+      "x_coordinate": 1574,
+      "y_coordinate": 89,
+      "sensor_type": "mult"
     }
   ],
   "объект 02.png": [
     {
-      "sensor_name": "Sensor3",
+      "sensor_name": "mult",
       "x_coordinate": 345,
       "y_coordinate": 678,
-      "sensor_type": "Temperature"
+      "sensor_type": "mult"
     },
     {
       "sensor_name": "Sensor4",
       "x_coordinate": 901,
       "y_coordinate": 234,
-      "sensor_type": "Humidity"
+      "sensor_type": "wet"
     }
   ]
 }

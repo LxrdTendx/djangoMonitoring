@@ -7,6 +7,8 @@ import os
 from django.conf import settings
 import re
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
+import json
 
 
 def login_view(request):
@@ -75,16 +77,4 @@ def logout_view(request):
     return redirect('login')  # Перенаправление на страницу входа после выхода
 
 
-def add_sensor(request):
-    if request.method == 'POST':
-        form = SensorForm(request.POST)
-        if form.is_valid():
-            new_sensor = form.save(commit=False)
-            new_sensor.user = request.user
-            new_sensor.save()
-            return redirect('profile')
-    else:
-        form = SensorForm()
-
-    return render(request, 'auth_user/add_sensor.html', {'form': form})
 

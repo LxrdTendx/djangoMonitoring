@@ -1,7 +1,6 @@
 {% extends "base_generic.html" %}
 {% load static %}
 
-
 {% block content %}
   <h2>Welcome, {{ user.username }}!</h2>
   <a href="{% url 'logout' %}">Logout</a>
@@ -10,51 +9,53 @@
     <button class="floor-button" data-image="{{ number }}.png">{{ number }}</button>
   {% endfor %}
 
-
-
-  <img id="floor-image" src="" alt="Floor image" style="display: none;">
-  <h3>Add sensor</h3>
-  <form id="sensor-form">
-      <label for="sensor-name">Sensor Name:</label><br>
-      <input type="text" id="sensor-name" name="sensor-name"><br>
-      <label for="sensor-type">Sensor Type:</label><br>
-      <select id="sensor-type" name="sensor-type">
-          <option value="mult">Multi-Sensor</option>
-          <option value="wet">Wet-Sensor</option>
-      </select><br>
-      <label for="sensor-x">X-coordinate:</label><br>
-      <input type="number" id="sensor-x" name="sensor-x" min="0"><br>
-      <label for="sensor-y">Y-coordinate:</label><br>
-      <input type="number" id="sensor-y" name="sensor-y" min="0"><br>
-      <input type="submit" value="Add Sensor">
-  </form>
+  <div id="floor-container" style="position: relative; display: inline-block;">
+    <img id="floor-image" src="" alt="Floor image" style="display: none;">
+    <div id="sensors-container" style="position: absolute; top: 0; left: 0; display: none;"></div>
+  </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    var staticUrl = "{% get_static_prefix %}";
+  var staticUrl = "{% get_static_prefix %}";
 
-    document.querySelectorAll('.floor-button').forEach(function(button) {
-        button.addEventListener('click', function(event) {
-            var imageFile = event.target.getAttribute('data-image');
-            var imageUrl = staticUrl + "{{ user.username }}/объект " + imageFile;
-            var imageElement = document.getElementById('floor-image');
-            imageElement.src = imageUrl;
-            imageElement.style.display = 'block';
+  document.querySelectorAll('.floor-button').forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      var imageFile = event.target.getAttribute('data-image');
+      var imageUrl = staticUrl + "{{ user.username }}/объект " + imageFile;
+      var imageElement = document.getElementById('floor-image');
+      imageElement.src = imageUrl;
+      imageElement.onload = function() {
+        imageElement.style.display = 'block';
 
-            // Display sensors for this floor
+        // Parse JSON
+        fetch(staticUrl + "{{ user.username }}/sensors.json")
+          .then(response => response.json())
+          .then(data => {
             var sensorsContainer = document.getElementById('sensors-container');
+            sensorsContainer.innerHTML = '';  // Clear previous sensors
+
+            var sensors = data["объект " + imageFile];
+            for (var i = 0; i < sensors.length; i++) {
+              var sensor = sensors[i];
+              var sensorButton = document.createElement('button');
+              sensorButton.className = 'sensor-button';
+              sensorButton.style.position = 'absolute';
+              sensorButton.style.width = '30px'
+              sensorButton.style.height = '30px'
+              sensorButton.style.left = sensor['x_coordinate'] + 'px';
+              sensorButton.style.top = sensor['y_coordinate'] + 'px';
+              sensorButton.innerHTML = "<img src='" + staticUrl + sensor['sensor_type'] + ".png'>";
+              sensorsContainer.appendChild(sensorButton);
+            }
+
             sensorsContainer.style.display = 'block';
             sensorsContainer.style.width = imageElement.width + 'px';
             sensorsContainer.style.height = imageElement.height + 'px';
-
-            document.querySelectorAll('.sensor-button').forEach(function(button) {
-                button.style.display = button.getAttribute('data-floor') === event.target.innerText ? 'block' : 'none';
-            });
         });
+      };
     });
+  });
 </script>
 {% endblock %}
-
-
