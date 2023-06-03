@@ -27,7 +27,7 @@
   ],
   "объект 02.png": [
     {
-      "sensor_name": "mult",
+      "sensor_name": "Sensor3",
       "x_coordinate": 345,
       "y_coordinate": 678,
       "sensor_type": "mult"
