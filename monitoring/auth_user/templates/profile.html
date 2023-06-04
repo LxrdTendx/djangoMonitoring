@@ -85,6 +85,7 @@
       padding: 10px 0;
       display: flex;
       flex-direction: column;
+      margin-bottom: 20px;
     }
 
     body{
@@ -112,6 +113,7 @@
     .logout-link:hover {
       color: #009FE3;
     }
+
 
     .sensor-button {
       background: none;
@@ -148,7 +150,7 @@
       </div>
 
       <a class="logout-link" href="{% url 'logout' %}">
-        <img src="Logout.svg">
+        <img src="{% static 'Logout.svg' %}" alt="Logout Icon" style="vertical-align: middle;">
       </a>
     </div>
 
