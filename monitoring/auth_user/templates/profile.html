@@ -1,27 +1,28 @@
-{% extends "base_generic.html" %}
+
 {% load static %}
 
 {% block content %}
-  <h2>Welcome, {{ user.username }}!</h2>
-  <p id="sensor-name">Name</p>
+  <head>
+    <title>Welcome, {{ user.username }}!</title>
+  </head>
 
   <style>
     .side-section {
-      width: 134px;
-      height: 715px;
+      min-width: 134px;
+      max-width: 134px;
+      min-height: 750px;
+      max-height: 750px;
       background: #383639;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       border-radius: 0px 0px 20px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-
     }
 
 
     .logo {
       margin-top: 29px;
-
     }
 
     .separator {
@@ -29,17 +30,14 @@
       height: 0;
       border: 1px solid #1F1F20;
       margin-top: 25px;
-
     }
 
     .graph-icon {
       margin-top: 17px;
       margin-bottom: 20px;
-
     }
 
     .floor-button {
-
       width: 60px;
       height: 60px;
       background: #1F1F20;
@@ -63,16 +61,18 @@
       transition: 1s;
       box-shadow: none;
     }
+
     .floor-button:focus {
       background: #FFFFFF;
       color: #1F1F20;
       box-shadow: none;
-
     }
+
     .floor-button.selected {
       background: #FFFFFF;
       color: #1F1F20;
     }
+
     .floor-buttons::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, Opera */
     }
@@ -86,9 +86,12 @@
       display: flex;
       flex-direction: column;
     }
+
     body{
       background-color: #1F1F20;
+      margin: 0;
     }
+
     .content-wrapper {
       display: flex;
     }
@@ -122,6 +125,7 @@
       max-width: 100%;
       max-height: 100%;
     }
+
     .sensor-button.selected {
       border: 3px solid #009FE3;
 
@@ -143,7 +147,9 @@
         {% endfor %}
       </div>
 
-      <a class="logout-link" href="{% url 'logout' %}">Logout</a>
+      <a class="logout-link" href="{% url 'logout' %}">
+        <img src="Logout.svg">
+      </a>
     </div>
 
     <div id="floor-container" style="position: relative; display: inline-block;">
@@ -151,6 +157,7 @@
       <div id="sensors-container" style="position: absolute; top: 0; left: 0; display: none;"></div>
     </div>
   </div>
+  <p id="sensor-name">Name</p>
 {% endblock %}
 
 
@@ -159,8 +166,9 @@
 <script>
   var staticUrl = "{% get_static_prefix %}";
 
-  // This will keep track of the currently selected sensor button
+  // These will keep track of the currently selected buttons
   var selectedSensorButton = null;
+  var selectedFloorButton = null;
 
   document.querySelectorAll('.floor-button').forEach(function(button) {
     button.addEventListener('click', function(event) {
@@ -170,6 +178,15 @@
       imageElement.src = imageUrl;
       imageElement.onload = function() {
         imageElement.style.display = 'block';
+
+        // If there was a previously selected floor button, remove its selected class
+        if (selectedFloorButton) {
+          selectedFloorButton.classList.remove('selected');
+        }
+
+        // Add selected class to the current floor button and update the selectedFloorButton variable
+        event.target.classList.add('selected');
+        selectedFloorButton = event.target;
 
         // Parse JSON
         fetch(staticUrl + "{{ user.username }}/sensors.json")
@@ -217,8 +234,3 @@
   });
 </script>
 {% endblock %}
-
-
-
-
-
