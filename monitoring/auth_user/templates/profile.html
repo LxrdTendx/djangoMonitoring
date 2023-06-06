@@ -131,7 +131,7 @@
     .sensor-button.selected {
       border: 3px solid #009FE3;
 
-      transition: 0.2s;
+      transition: 0.1s;
       border-radius: 5px;
     }
 
@@ -210,19 +210,24 @@
               // Add event listener for the sensor button
               sensorButton.addEventListener('click', (function(sensor) {
                 return function() {
-                  // If there was a previously selected sensor button, remove its selected class
-                  if (selectedSensorButton) {
-                    selectedSensorButton.classList.remove('selected');
-                  }
+                    // Если была ранее выбрана кнопка сенсора, удалите ее выбранный класс
+                    if (selectedSensorButton) {
+                        selectedSensorButton.classList.remove('selected');
+                    }
 
-                  // Add selected class to the current sensor button and update the selectedSensorButton variable
-                  sensorButton.classList.add('selected');
-                  selectedSensorButton = sensorButton;
+                    // Добавить выбранный класс к текущей кнопке сенсора и обновить переменную selectedSensorButton
+                    sensorButton.classList.add('selected');
+                    selectedSensorButton = sensorButton;
 
-                  // Set the name of the sensor in the p tag
-                  document.getElementById('sensor-name').innerText = sensor['sensor_name'];
+                    // AJAX запрос к нашей новой функции в Django
+                    fetch('/get_sensor_data/' + sensor['sensor_name'])
+                        .then(response => response.json())
+                        .then(data => {
+                            // Устанавливаем имя сенсора в тег <p>
+                            document.getElementById('sensor-name').innerText = data['sensor_name'];
+                        });
                 }
-              })(sensor));  // Pass the current sensor as an argument
+            })(sensor));   // Pass the current sensor as an argument
 
               sensorsContainer.appendChild(sensorButton);
             }
@@ -234,5 +239,6 @@
       };
     });
   });
+
 </script>
 {% endblock %}

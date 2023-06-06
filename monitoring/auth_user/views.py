@@ -9,6 +9,24 @@ import re
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
+import psycopg2
+
+
+@login_required
+def get_sensor_data(request, sensor_name):
+    conn = psycopg2.connect(
+        user='postgres',
+        password='qwerty2237563822375638qwerty11',
+        host='db.zippxfsbfondjxkayboi.supabase.co',
+        port='6543',
+        database='postgres'
+    )
+
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM sensors_tabel WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 1", (sensor_name,))
+    result = cur.fetchone()
+
+    return JsonResponse({'sensor_name': result})
 
 
 def login_view(request):
