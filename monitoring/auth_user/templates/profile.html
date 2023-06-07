@@ -110,10 +110,16 @@
       bottom:0;
     }
 
-    .logout-link:hover {
-      color: #009FE3;
+    .logout-icon {
+        width: 41px; /* Установите размер изображения */
+        height: 37px;
+        background: url("{% static 'Logout.svg' %}") no-repeat;
     }
 
+    .logout-link:hover .logout-icon {
+        transition: 0.5s;
+        background: url("{% static 'Logout-hover.svg' %}") no-repeat;
+    }
 
     .sensor-button {
       background: none;
@@ -150,7 +156,7 @@
       </div>
 
       <a class="logout-link" href="{% url 'logout' %}">
-        <img src="{% static 'Logout.svg' %}" alt="Logout Icon" style="vertical-align: middle;">
+          <div class="logout-icon"></div>
       </a>
     </div>
 
