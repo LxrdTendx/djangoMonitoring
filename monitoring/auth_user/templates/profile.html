@@ -8,6 +8,8 @@
 
   <style>
     .side-section {
+
+      position: sticky;
       min-width: 134px;
       max-width: 134px;
       min-height: 750px;
@@ -19,6 +21,7 @@
       flex-direction: column;
       align-items: center;
     }
+
 
 
     .logo {
@@ -95,6 +98,7 @@
 
     .content-wrapper {
       display: flex;
+      position: relative;
     }
 
     .logout-link {
@@ -141,11 +145,48 @@
       border-radius: 5px;
     }
 
+    .block-date-time {
+      width: 650px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+      margin-top: 46px ;
+    }
+    .block-sensor-info {
+      width: 650px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+      margin-top: 46px ;
+    }
+    .block-errors {
+      width: 376px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+      margin-top: 46px ;
+    }
+    #floor-container {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap; /* This allows the content to wrap if it exceeds the container's width */
+    }
+
+
   </style>
 
   <div class="content-wrapper">
     <div class="side-section">
-      <img class="logo" src="{% static 'logo.png' %}" alt="Logo">
+      <a href="https://sownh.com">
+        <img class="logo" src="{% static 'logo.png' %}" alt="Logo" >
+      </a>
+
       <hr class="separator">
       <img class="graph-icon" src="{% static 'graph-none.png' %}" alt="Graph icon">
 
@@ -160,9 +201,12 @@
       </a>
     </div>
 
-    <div id="floor-container" style="position: relative; display: inline-block;">
+    <div id="floor-container" >
+      <div class="block-date-time"></div>
+      <div class="block-sensor-info"></div>
+      <div class="block-errors"></div>
       <img id="floor-image" src="" alt="Floor image" style="display: none;">
-      <div id="sensors-container" style="position: absolute; top: 0; left: 0; display: none;"></div>
+      <div id="sensors-container" style="position: absolute; top: 0; left: 0; display: none; margin-top: 300px"></div>
     </div>
   </div>
   <p id="sensor-name">Name</p>
@@ -172,6 +216,7 @@
 
 {% block extra_js %}
 <script>
+
   var staticUrl = "{% get_static_prefix %}";
 
   // These will keep track of the currently selected buttons
