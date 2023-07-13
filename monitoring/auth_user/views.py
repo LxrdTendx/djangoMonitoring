@@ -26,8 +26,74 @@ def get_sensor_data(request, sensor_name):
     cur.execute("SELECT * FROM sensors_tabel WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 1", (sensor_name,))
     result = cur.fetchone()
 
-    return JsonResponse({'sensor_name': result})
+    if result:
+        # Assumes that the result is a list with each element corresponding to a part of the sensor string
+        sensor_data = {
+            'id': result[0],
+            'name': result[1],
+            'type': result[2],
+            'temperature': result[3],
+            'co2': result[4],
+            'humidity': result[5],
+            'time': result[6],
+            'date': result[7],
+        }
+    else:
+        sensor_data = {
+            'id': None,
+            'name': None,
+            'type': None,
+            'temperature': None,
+            'co2': None,
+            'humidity': None,
+            'date': None,
+            'time': None,
+        }
 
+    return JsonResponse(sensor_data)
+
+@login_required
+def get_sensor_data_history(request, sensor_name):
+    conn = psycopg2.connect(
+        user='postgres',
+        password='qwerty2237563822375638qwerty11',
+        host='db.zippxfsbfondjxkayboi.supabase.co',
+        port='6543',
+        database='postgres'
+    )
+
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM sensors_tabel WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 100", (sensor_name,))
+    result = cur.fetchall()
+
+    sensor_data_history = []
+    if result:
+        for row in result:
+            sensor_data = {
+                'id': row[0],
+                'name': row[1],
+                'type': row[2],
+                'temperature': row[3],
+                'co2': row[4],
+                'humidity': row[5],
+                'time': row[6],
+                'date': row[7],
+            }
+            sensor_data_history.append(sensor_data)
+    else:
+        sensor_data = {
+            'id': None,
+            'name': None,
+            'type': None,
+            'temperature': None,
+            'co2': None,
+            'humidity': None,
+            'date': None,
+            'time': None,
+        }
+        sensor_data_history.append(sensor_data)
+
+    return JsonResponse(sensor_data_history, safe=False)
 
 def login_view(request):
     if request.method == 'POST':
@@ -44,8 +110,6 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
-
-
 
 @login_required
 def profile(request):
@@ -66,28 +130,26 @@ def profile(request):
         'floor_numbers': floor_numbers,
     })
 
-
+@login_required
 @login_required
 def profile_view(request):
     user_images_dir = os.path.join(settings.STATIC_ROOT, request.user.username)
     floor_images = {}
     sensors_data = {}
+    sensor_names = ['temperature', 'co2', 'humidity']
 
     if os.path.exists(user_images_dir):
         image_files = [f for f in os.listdir(user_images_dir) if f.endswith('.png')]
         floor_images = {f.split()[-1].split('.')[0]: f for f in image_files}
 
         # Load sensors data
-        json_file_path = os.path.join(user_images_dir, 'sensors.json')
-        if os.path.exists(json_file_path):
-            with open(json_file_path, 'r') as json_file:
-                sensors_data = json.load(json_file)
+        for sensor in sensor_names:
+            sensors_data[sensor] = get_sensor_data(request, sensor)
 
     return render(request, 'auth_user/profile.html', {
         'floor_images': floor_images,
         'sensors_data': sensors_data,
     })
-
 
 
 def logout_view(request):

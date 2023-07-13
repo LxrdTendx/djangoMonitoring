@@ -1,6 +1,17 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+
+  <style>
+    .form-control{
+      width: 250px;
+      height: 30px;
+      flex-shrink: 0;
+      border-radius: 5px;
+      background: var(--main-grey, #383639);
+    }
+
+  </style>
   <h2>Login</h2>
   <form method="post">
     {% csrf_token %}

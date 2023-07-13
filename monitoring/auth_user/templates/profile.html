@@ -1,11 +1,9 @@
-
 {% load static %}
 
 {% block content %}
   <head>
     <title>Welcome, {{ user.username }}!</title>
   </head>
-
   <style>
     .side-section {
 
@@ -139,10 +137,12 @@
     }
 
     .sensor-button.selected {
-      border: 3px solid #009FE3;
-
+      border: 4px solid #009FE3;
       transition: 0.1s;
       border-radius: 5px;
+    }
+    #sensor-name{
+      color: white;
     }
 
     .block-date-time {
@@ -174,8 +174,129 @@
     }
     #floor-container {
       position: relative;
+      flex-wrap: nowrap; /* This allows the content to wrap if it exceeds the container's width */
+    }
+    #sensor{
+      margin-bottom: 0px;
+      margin-top: 29px;
+      width: 431px;
+      height: 83px;
+      flex-direction: column;
+      flex-shrink: 0;
+      color: var(--main-white, #FFF);
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    #sensor-info-type{
+      width: 378px;
+      margin-top: 19px;
+      color: var(--main-violet, #9960D2);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    #sensor-date{
+      margin-top: 28px;
+      margin-bottom: 0px;
+      width: 120px;
+      color: var(--main-white, #FFF);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    #sensor-time{
+      margin-top: 28px;
+      margin-bottom: 0px;
+      margin-left: 80px;
+      width: 130px;
+      color: var(--main-white, #FFF);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    .date_time-block{
       display: flex;
-      flex-wrap: wrap; /* This allows the content to wrap if it exceeds the container's width */
+    }
+    .info-sensors{
+      margin-left: 34px;
+      margin-top: 29px;
+      margin-bottom: 0px;
+      width: 499px;
+      height: 52px;
+      flex-direction: column;
+      flex-shrink: 0;
+      color: var(--main-white, #FFF);
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    .params{
+      display: flex;
+      width: 650px;
+      margin-top: 31px;
+    }
+    #hum{
+      margin-left: 34px;
+    }
+    #hum, #co2, #temp{
+      margin-top: 0px;
+      margin-bottom: 0px;
+      color: var(--main-white, #FFF);
+      margin-right: 140px;
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    #params-stats{
+      margin-left: 34px;
+      margin-top: 40px;
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+    }
+    .block-date-time{
+      display: flex;
+    }
+    .sensors_icon_type{
+      margin-top: 42px;
+      margin-left: 38px;
+      margin-right: 27px;
+      height: 140px;
+      width: 140px;
+    }
+    .main-sector{
+      margin-top: 32px;
+    }
+    .block-errors {
+      height: 250px;
+      width: 371px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      color:red;
+      padding-bottom: 4px;
+      padding-left: 4px;
+      font-size: 15px;
+    }
+    .error-message {
+      border: 1px solid red;
+      margin: 5px;
+      padding: 10px;
     }
 
 
@@ -183,7 +304,7 @@
 
   <div class="content-wrapper">
     <div class="side-section">
-      <a href="https://sownh.com">
+      <a href="https://sownh.ru/monitoringsys">
         <img class="logo" src="{% static 'logo.png' %}" alt="Logo" >
       </a>
 
@@ -196,30 +317,62 @@
         {% endfor %}
       </div>
 
-      <a class="logout-link" href="{% url 'logout' %}">
+      <a class="logout-link" href="{% url 'logout' %}" >
           <div class="logout-icon"></div>
       </a>
     </div>
 
     <div id="floor-container" >
-      <div class="block-date-time"></div>
-      <div class="block-sensor-info"></div>
-      <div class="block-errors"></div>
-      <img id="floor-image" src="" alt="Floor image" style="display: none;">
-      <div id="sensors-container" style="position: absolute; top: 0; left: 0; display: none; margin-top: 300px"></div>
+      <div style="display: flex">
+        <div class="block-date-time">
+          <img src="{% static 'def_icon.png' %}" class="sensors_icon_type" id="sensors_icon_type">
+          <div>
+            <p id="sensor">Вид датчика</p>
+            <p id="sensor-info-type">Параметры измерения датчика</p>
+            <div class="date_time-block">
+              <p id="sensor-date">Дата измерения</p>
+              <p id="sensor-time">Время измерения</p>
+            </div>
+          </div>
+
+        </div>
+        <div class="block-sensor-info">
+          <p class="info-sensors">Показатели</p>
+          <div class="params">
+            <p id="hum">%</p>
+            <p id="co2">ppm</p>
+            <p id="temp">℃</p>
+          </div>
+          <p id="params-stats"></p>
+        </div>
+        <div class="block-errors">
+          <ul id="error-list" style="overflow-y: scroll; max-height: 300px; color: red">
+          </ul>
+        </div>
+      </div>
+      <div class="main-sector">
+        <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none; ">
+        <div id="sensors-container" style="position: absolute; margin-top:332px; top: 0; left: 0; display: none; "></div>
+      </div>
+        <p id="sensor-name">Name</p>
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <canvas id="tempChart" style="width:100%;max-width:600px"></canvas>
+          <canvas id="co2Chart" style="width:100%;max-width:600px"></canvas>
+          <canvas id="humChart" style="width:100%;max-width:600px"></canvas>
+
     </div>
+
+
   </div>
-  <p id="sensor-name">Name</p>
+
 {% endblock %}
 
 
 
 {% block extra_js %}
 <script>
-
   var staticUrl = "{% get_static_prefix %}";
 
-  // These will keep track of the currently selected buttons
   var selectedSensorButton = null;
   var selectedFloorButton = null;
 
@@ -232,21 +385,18 @@
       imageElement.onload = function() {
         imageElement.style.display = 'block';
 
-        // If there was a previously selected floor button, remove its selected class
         if (selectedFloorButton) {
           selectedFloorButton.classList.remove('selected');
         }
 
-        // Add selected class to the current floor button and update the selectedFloorButton variable
         event.target.classList.add('selected');
         selectedFloorButton = event.target;
 
-        // Parse JSON
         fetch(staticUrl + "{{ user.username }}/sensors.json")
           .then(response => response.json())
           .then(data => {
             var sensorsContainer = document.getElementById('sensors-container');
-            sensorsContainer.innerHTML = '';  // Clear previous sensors
+            sensorsContainer.innerHTML = '';
 
             var sensors = data["объект " + imageFile];
             for (var i = 0; i < sensors.length; i++) {
@@ -254,31 +404,84 @@
               let sensorButton = document.createElement('button');
               sensorButton.className = 'sensor-button';
               sensorButton.style.position = 'absolute';
-              sensorButton.style.left = sensor['x_coordinate'] + 'px';
-              sensorButton.style.top = sensor['y_coordinate'] + 'px';
+              sensorButton.style.marginLeft = sensor['x_coordinate'] + 'px';
+              sensorButton.style.marginTop = sensor['y_coordinate'] + 'px';
               sensorButton.innerHTML = "<img src='" + staticUrl + sensor['sensor_type'] + ".png'>";
 
-              // Add event listener for the sensor button
               sensorButton.addEventListener('click', (function(sensor) {
                 return function() {
-                    // Если была ранее выбрана кнопка сенсора, удалите ее выбранный класс
                     if (selectedSensorButton) {
                         selectedSensorButton.classList.remove('selected');
                     }
 
-                    // Добавить выбранный класс к текущей кнопке сенсора и обновить переменную selectedSensorButton
                     sensorButton.classList.add('selected');
                     selectedSensorButton = sensorButton;
 
-                    // AJAX запрос к нашей новой функции в Django
                     fetch('/get_sensor_data/' + sensor['sensor_name'])
                         .then(response => response.json())
                         .then(data => {
-                            // Устанавливаем имя сенсора в тег <p>
-                            document.getElementById('sensor-name').innerText = data['sensor_name'];
+                          let tempElement = document.getElementById('temp');
+                          let co2Element = document.getElementById('co2');
+                          let humElement = document.getElementById('hum');
+                          let statsElement = document.getElementById('params-stats');
+
+                          let isCritical = false;
+
+                          if (data['temperature'] >= 20 && data['temperature'] <= 22) {
+                            tempElement.style.color = "#39FF27"; // Зеленый
+                          } else if (data['temperature'] >= 20 && data['temperature'] <= 24) {
+                            tempElement.style.color = "#FFA500"; // Оранжевый
+                          } else {
+                            tempElement.style.color = "#FF564B"; // Красный
+                            isCritical = true;
+                          }
+
+                          if (data['co2'] >= 350 && data['co2'] <= 400) {
+                            co2Element.style.color = "#39FF27"; // Зеленый
+                          } else if (data['co2'] >= 400 && data['co2'] <= 700) {
+                            co2Element.style.color = "#FFA500"; // Оранжевый
+                          } else {
+                            co2Element.style.color = "#FF564B"; // Красный
+                            isCritical = true;
+                          }
+
+                          if (data['humidity'] >= 48 && data['humidity'] <= 52) {
+                            humElement.style.color = "#39FF27"; // Зеленый
+                          } else if (data['humidity'] >= 40 && data['humidity'] <= 60) {
+                            humElement.style.color = "#FFA500"; // Оранжевый
+                          } else {
+                            humElement.style.color = "#FF564B"; // Красный
+                            isCritical = true;
+                          }
+
+                          if (isCritical) {
+                            statsElement.innerText = "Есть критические показатели";
+                            statsElement.style.color = "#FF564B"; // Красный
+                          } else {
+                            statsElement.innerText = "Показатели в пределах нормы";
+                            statsElement.style.color = "#39FF27"; // Зеленый
+                          }
+
+                          if(data['type'] == 'mult'){
+                            document.getElementById('sensor').innerText = "Мультидатчик параметров среды";
+                            document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность, CO2 и температуру";
+                            document.getElementById('sensors_icon_type').src = staticUrl + "mult_icon.png";
+                          } else{
+                            document.getElementById('sensor').innerText = "Датчик влажности";
+                            document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность";
+                            document.getElementById('sensors_icon_type').src = staticUrl + "def_icon.png";
+                          }
+                          // document.getElementById('sensor-name').innerText = "Name: " + data['name'];
+                          document.getElementById('sensor-time').innerText = data['time'];
+                          document.getElementById('sensor-date').innerText = data['date'];
+                          tempElement.innerText = "℃:" +data['temperature'];
+                          co2Element.innerText = "ppm:" +data['co2'];
+                          humElement.innerText = "%" + data['humidity'];
+                          document.getElementById('sensor-type').innerText = "Type: " + data['type'];
                         });
                 }
-            })(sensor));   // Pass the current sensor as an argument
+
+            })(sensor));
 
               sensorsContainer.appendChild(sensorButton);
             }
@@ -290,6 +493,54 @@
       };
     });
   });
+  function checkForCriticalValues() {
+    fetch(staticUrl + "{{ user.username }}/sensors.json")
+      .then(response => response.json())
+      .then(data => {
+        // get the floor number from the object
+        let floors = Object.keys(data);
+        floors.forEach(floor => {
+          let floorNum = floor.split(' ')[1].replace('.png', ''); // 'объект 01.png' => 01
+          let sensors = data[floor];
+          sensors.forEach(sensor => {
+            fetch('/get_sensor_data/' + sensor['sensor_name'])
+              .then(response => response.json())
+              .then(data => {
+                let criticalParameters = [];
+                if (data['temperature'] < 20 || data['temperature'] > 24) {
+                  criticalParameters.push('temperature');
+                }
+                if (data['co2'] < 350 || data['co2'] > 700) {
+                  criticalParameters.push('co2');
+                }
+                if (data['humidity'] < 40 || data['humidity'] > 60) {
+                  criticalParameters.push('humidity');
+                }
+
+                if (criticalParameters.length > 0) {
+                  let errorBlock = document.querySelector('.block-errors');
+                  let errorItem = document.createElement('div');
+                  let currentTime = new Date();
+                  let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
+                  errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr}, ${criticalParameters.join(', ')}`;
+                  errorBlock.prepend(errorItem);
+                }
+              });
+          });
+        });
+      });
+  }
+
+
+  // Запустить checkForCriticalValues каждую минуту
+  setInterval(checkForCriticalValues, 20000);
 
 </script>
 {% endblock %}
+
+
+
+
+
+
+
