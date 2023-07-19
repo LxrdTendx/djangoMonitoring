@@ -118,8 +118,9 @@
         transition: 0.5s;
         background: url("{% static 'Logout-hover.svg' %}") no-repeat;
     }
-    .graph-link{
-      margin-bottom: 24px;
+
+    .graph-link {
+      margin-bottom: 20px;
       text-decoration: none;
       font-family: 'Inter', sans-serif;
       font-style: normal;
@@ -127,17 +128,18 @@
       font-size: 24px;
       line-height: 29px;
       color: #FFFFFF;
-
       bottom:0;
     }
+
     .graph-icon {
-      margin-top: 17px;
-      margin-bottom: 20px;
-      background: url("{% static 'graph-none.png' %}") no-repeat;
+        width: 61px; /* Установите размер изображения */
+        height: 61px;
+        background: url("{% static 'graph-none.svg' %}") no-repeat;
     }
-    .graph-link:hover .graph-icon{
-      transition: 0.5s;
-      background: url("{% static 'graph-active.png' %}") no-repeat;
+
+    .graph-link:hover .graph-icon {
+        transition: 0.5s;
+        background: url("{% static 'graph-active.svg' %}") no-repeat;
     }
 
     .sensor-button {
@@ -347,9 +349,11 @@
       </a>
 
       <hr class="separator">
-      <a class="graph-link">
+      <div class="graph-link">
         <div class="graph-icon"></div>
-      </a>
+      </div>
+
+
 
 
       <div class="floor-buttons">
