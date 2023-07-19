@@ -7,8 +7,6 @@
   </head>
   <style>
     .side-section {
-
-      position: fixed;
       min-width: 134px;
       max-width: 134px;
       min-height: 750px;
@@ -91,6 +89,7 @@
     }
 
     body{
+      zoom: 75%;
       background-color: #1F1F20;
       margin: 0;
     }
@@ -138,7 +137,7 @@
     }
 
     .sensor-button.selected {
-      border: 4px solid #009FE3;
+      box-shadow: 0 0 0 4px #009FE3;
       transition: 0.1s;
       border-radius: 5px;
     }
@@ -164,17 +163,7 @@
       margin-left: 23px;
 
     }
-    .block-errors {
-      width: 376px;
-      height: 250px;
-      background: #383639;
-      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-      border-radius: 20px;
-      margin-left: 23px;
-
-    }
     #floor-container {
-      margin-left: 134px;
       position: relative;
       flex-wrap: nowrap; /* This allows the content to wrap if it exceeds the container's width */
     }
@@ -286,13 +275,17 @@
       margin-top: 32px;
     }
     .block-errors {
+      font-family: 'Inter',sans-serif;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
       height: 250px;
       width: 371px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       color:red;
-      padding-bottom: 4px;
       font-size: 20px;
       -ms-overflow-style: none;
       scrollbar-width: none;
@@ -302,7 +295,6 @@
       height: 0;
     }
     ul{
-
       padding-left: 15px;
     }
     .error-message {
@@ -320,9 +312,14 @@
       display: none;
       margin-left: 23px;
       border-radius: 15px;
+
     }
     .critical {
       filter: brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(7) contrast(0.88);
+    }
+    .charts-block{
+      display: flex;
+      width: 1308px;
     }
   </style>
 
@@ -379,7 +376,18 @@
         <div id="sensors-container" style="position: absolute; margin-top:332px; top: 0; left: 0; display: none; "></div>
       </div>
         <p id="sensor-name"></p>
-        <canvas id="temperatureChart"></canvas>
+        <div class="charts-block" style="zoom:133%">
+          <div class="chart-container" style="position: relative; height:30vh; width:30vw">
+              <canvas id="temperatureChart"></canvas>
+          </div>
+          <div class="chart-container" style="position: relative; height:30vh; width:30vw">
+              <canvas id="humidityChart"></canvas>
+          </div>
+          <div class="chart-container" style="position: relative; height:30vh; width:30vw">
+              <canvas id="co2Chart"></canvas>
+          </div>
+        </div>
+
     </div>
 
 
@@ -391,13 +399,16 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+
 <script>
   var staticUrl = "{% get_static_prefix %}";
 
   var selectedSensorButton = null;
   var selectedFloorButton = null;
   var refreshIntervalId = null;
-  var chartInstance = null;
+  var temperatureChartInstance = null;
+  var humidityChartInstance = null;
+  var co2ChartInstance = null;
 
   var lineState = {
     temperature: false,
@@ -536,13 +547,16 @@
                             let humidity= data.map(item => item['humidity']);
                             let co2 = data.map(item => item['co2']);
                             // document.getElementById('sensor-name').innerText = times + '\n' + temperatures;
-                            let ctx = document.getElementById('temperatureChart').getContext('2d');
+                            let temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+                            let humidityCtx = document.getElementById('humidityChart').getContext('2d');
+                            let co2Ctx = document.getElementById('co2Chart').getContext('2d');
+
                             // ctx.style.backgroundColor = 'rgba(0, 159, 227, 1)';
-                            if (chartInstance != null) {
-                              chartInstance.destroy();
+                            if (temperatureChartInstance != null) {
+                              temperatureChartInstance.destroy();
                             }
 
-                            chartInstance = new Chart(ctx, {
+                            temperatureChartInstance = new Chart(temperatureCtx, {
                                 type: "line",
                                 data: {
                                    borderColor: "#009FE3",
@@ -551,24 +565,14 @@
                                       {
                                         label: "Температура",
                                         backgroundColor: "red",
-                                        borderColor: "black",
+                                        borderColor: "#FFA07A",
                                         data: temperatures
                                       },
-                                     {
-                                       label: "Влажность",
-                                       backgroundColor: "blue",
-                                       borderColor: "#009FE3",
-                                       data: humidity
-                                     },
-                                     {
-                                       label: "СО2",
-                                       backgroundColor: "green",
-                                       borderColor: "lightgreen",
-                                       data: co2
-                                     }
                                    ]
                                 },
                                 options:{
+                                  events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'touchend', 'mouseenter', 'mouseleave'],
+                                  maintainAspectRatio: false,
                                   plugins:{
                                     legend:{
                                       labels:{
@@ -593,7 +597,109 @@
                                     y:{
                                       ticks:{
                                         font: {
-                                          size:20,
+                                          size:16,
+                                        },
+                                        color: '#009FE3'
+                                      }
+                                    }
+                                  },
+                                }
+                              });
+                            if (humidityChartInstance != null) {
+                              humidityChartInstance.destroy();
+                            }
+                            humidityChartInstance = new Chart(humidityCtx, {
+                                type: "line",
+                                data: {
+                                   borderColor: "#009FE3",
+                                   labels: times,
+                                   datasets: [
+                                      {
+                                        label: "Влажность",
+                                        backgroundColor: "blue",
+                                        borderColor: "#009FE3",
+                                        data: humidity
+                                      },
+                                   ]
+                                },
+                                options:{
+                                  maintainAspectRatio: false,
+                                  plugins:{
+                                    legend:{
+                                      labels:{
+                                        font:{
+                                          size:16
+                                        }
+                                      }
+                                    }
+                                  },
+                                  scales:{
+                                    x:{
+                                      display: false,
+                                      ticks: {
+                                        font:{
+                                          size: 40,
+                                        },
+                                      },
+                                      grid:{
+                                        color: 'ccc'
+                                      }
+                                    },
+                                    y:{
+                                      ticks:{
+                                        font: {
+                                          size:16,
+                                        },
+                                        color: '#009FE3'
+                                      }
+                                    }
+                                  },
+                                }
+                              });
+                            if (co2ChartInstance != null) {
+                              co2ChartInstance.destroy();
+                            }
+                            co2ChartInstance = new Chart(co2Ctx, {
+                                type: "line",
+                                data: {
+                                   borderColor: "#009FE3",
+                                   labels: times,
+                                   datasets: [
+                                      {
+                                        label: "СО2",
+                                        backgroundColor: "green",
+                                        borderColor: "lightgreen",
+                                        data: co2
+                                      },
+                                   ]
+                                },
+                                options:{
+                                  maintainAspectRatio: false,
+                                  plugins:{
+                                    legend:{
+                                      labels:{
+                                        font:{
+                                          size:16
+                                        }
+                                      }
+                                    }
+                                  },
+                                  scales:{
+                                    x:{
+                                      display: false,
+                                      ticks: {
+                                        font:{
+                                          size: 40,
+                                        },
+                                      },
+                                      grid:{
+                                        color: 'ccc'
+                                      }
+                                    },
+                                    y:{
+                                      ticks:{
+                                        font: {
+                                          size:16,
                                         },
                                         color: '#009FE3'
                                       }
