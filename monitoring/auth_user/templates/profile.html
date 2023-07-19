@@ -142,6 +142,11 @@
         background: url("{% static 'graph-active.svg' %}") no-repeat;
     }
 
+    .graph-link.active .graph-icon{
+      transition: 0.5s;
+      background: url("{% static 'graph-active.svg' %}") no-repeat;
+    }
+
     .sensor-button {
       background: none;
       border: none;
@@ -160,6 +165,7 @@
       transition: 0.1s;
       border-radius: 5px;
     }
+
     #sensor-name{
       margin-left: 23px;
       color: white;
@@ -331,6 +337,7 @@
       display: none;
       margin-left: 23px;
       border-radius: 15px;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
     }
     .critical {
@@ -349,9 +356,9 @@
       </a>
 
       <hr class="separator">
-      <div class="graph-link">
+      <a class="graph-link" href="#">
         <div class="graph-icon"></div>
-      </div>
+      </a>
 
 
 
@@ -424,6 +431,7 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
 
+
 <script>
   var staticUrl = "{% get_static_prefix %}";
 
@@ -439,9 +447,29 @@
     co2: false,
     humidity: false
   };
+  var graphLink = document.querySelector('.graph-link');
+
+  // Добавляем обработчик события при клике
+  graphLink.addEventListener('click', function() {
+    // Проверяем, есть ли у элемента класс 'active'
+    if (graphLink.classList.contains('active')) {
+      // Если класс 'active' есть, удаляем его
+      graphLink.classList.remove('active');
+      graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-none.svg' %}') no-repeat";
+      // Делаем #floor-container видимым
+      document.querySelector("#floor-container").style.display = "block";
+    } else {
+      // Если класса 'active' нет, добавляем его
+      graphLink.classList.add('active');
+      graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-active.svg' %}') no-repeat";
+      // Скрываем #floor-container
+      document.querySelector("#floor-container").style.display = "none";
+    }
+  });
 
   document.querySelectorAll('.floor-button').forEach(function(button) {
     button.addEventListener('click', function(event) {
+      document.querySelector("#floor-container").style.display = "block";
       var imageFile = event.target.getAttribute('data-image');
       var imageUrl = staticUrl + "{{ user.username }}/объект " + imageFile;
       var imageElement = document.getElementById('floor-image');
@@ -455,7 +483,11 @@
 
         event.target.classList.add('selected');
         selectedFloorButton = event.target;
-
+        var graphLink = document.querySelector('.graph-link');
+        if (graphLink.classList.contains('active')) {
+          graphLink.classList.remove('active');
+          graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-none.svg' %}') no-repeat";
+        }
         fetch(staticUrl + "{{ user.username }}/sensors.json")
           .then(response => response.json())
           .then(data => {
@@ -470,7 +502,15 @@
               sensorButton.style.position = 'absolute';
               sensorButton.style.marginLeft = sensor['x_coordinate'] + 'px';
               sensorButton.style.marginTop = sensor['y_coordinate'] + 'px';
-              sensorButton.innerHTML = "<img src='" + staticUrl + sensor['sensor_type'] + ".png'>";
+
+              let sensorImage = document.createElement('div');
+              sensorImage.className = 'sensor-image';
+
+              let sensorImgElement = document.createElement('img');
+              sensorImgElement.src = staticUrl + sensor['sensor_type'] + ".png";
+
+              sensorImage.appendChild(sensorImgElement);
+              sensorButton.appendChild(sensorImage);
 
               fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
                 .then(response => response.json())
@@ -486,7 +526,15 @@
                     isCritical = true;
                   }
                   if (isCritical) {
-                    sensorButton.classList.add('critical');
+                    let overlayDiv = document.createElement('div');
+                    overlayDiv.style.position = 'absolute';
+                    overlayDiv.style.top = '0';
+                    overlayDiv.style.left = '0';
+                    overlayDiv.style.width = '100%';
+                    overlayDiv.style.height = '100%';
+                    overlayDiv.style.borderRadius='5px';
+                    overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
+                    sensorButton.appendChild(overlayDiv);
                   }
                 });
 
