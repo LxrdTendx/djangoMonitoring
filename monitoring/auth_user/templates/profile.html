@@ -32,10 +32,6 @@
       margin-top: 25px;
     }
 
-    .graph-icon {
-      margin-top: 17px;
-      margin-bottom: 20px;
-    }
 
     .floor-button {
       width: 60px;
@@ -121,6 +117,27 @@
     .logout-link:hover .logout-icon {
         transition: 0.5s;
         background: url("{% static 'Logout-hover.svg' %}") no-repeat;
+    }
+    .graph-link{
+      margin-bottom: 24px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      color: #FFFFFF;
+
+      bottom:0;
+    }
+    .graph-icon {
+      margin-top: 17px;
+      margin-bottom: 20px;
+      background: url("{% static 'graph-none.png' %}") no-repeat;
+    }
+    .graph-link:hover .graph-icon{
+      transition: 0.5s;
+      background: url("{% static 'graph-active.png' %}") no-repeat;
     }
 
     .sensor-button {
@@ -330,7 +347,10 @@
       </a>
 
       <hr class="separator">
-      <img class="graph-icon" src="{% static 'graph-none.png' %}" alt="Graph icon">
+      <a class="graph-link">
+        <div class="graph-icon"></div>
+      </a>
+
 
       <div class="floor-buttons">
         {% for number in floor_numbers %}
@@ -377,13 +397,13 @@
       </div>
         <p id="sensor-name"></p>
         <div class="charts-block" style="zoom:133%">
-          <div class="chart-container" style="position: relative; height:30vh; width:30vw">
+          <div class="chart-container" style="position: relative; height:30vh; width:40vw">
               <canvas id="temperatureChart"></canvas>
           </div>
-          <div class="chart-container" style="position: relative; height:30vh; width:30vw">
+          <div class="chart-container" style="position: relative; height:30vh; width:40vw">
               <canvas id="humidityChart"></canvas>
           </div>
-          <div class="chart-container" style="position: relative; height:30vh; width:30vw">
+          <div class="chart-container" style="position: relative; height:30vh; width:40vw">
               <canvas id="co2Chart"></canvas>
           </div>
         </div>
