@@ -627,11 +627,15 @@
                       fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
                         .then(response => response.json())
                         .then(data => {
-                            let times = data.map(item => new Date(item['date'] + ' ' + item['time']));
-                            let temperatures = data.map(item => item['temperature']);
+                            let timesall = data.map(item => new Date(item['date'] + ' ' + item['time']));
+                            let temperaturesall = data.map(item => item['temperature']);
+                            let humidityall = data.map(item => item['humidity']);
+                            let co2all = data.map(item => item['co2']);
 
-                            let humidity= data.map(item => item['humidity']);
-                            let co2 = data.map(item => item['co2']);
+                            let times = timesall.slice(-35);
+                            let humidity = humidityall.slice(-35);
+                            let temperatures = temperaturesall.slice(-35);
+                            let co2 = co2all.slice(-35);
                             // document.getElementById('sensor-name').innerText = times + '\n' + temperatures;
                             let temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
                             let humidityCtx = document.getElementById('humidityChart').getContext('2d');
@@ -867,9 +871,7 @@
       });
   }
   checkForCriticalValues();
-  function onlyUnique(value, index, self) {
-    return self.indexOf(value) === index;
-  }
+
   function generateChartsForSensors() {
     let floorsContainer = document.querySelector("#statistic");
 
@@ -915,13 +917,24 @@
             chartsContainerArea.style.marginTop = '20px';
             graphContainer.appendChild(chartsContainerArea);
 
+            let chartsContainerModern = document.createElement("div");  // новый div для графиков
+            chartsContainerModern.style.display = "flex";
+            chartsContainerModern.style.minHeight = '200px';
+            chartsContainerModern.style.marginTop = '20px';
+            graphContainer.appendChild(chartsContainerModern);
+
             fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
               .then(response => response.json())
               .then(data => {
-                let times = data.map(item => new Date(item['date'] + ' ' + item['time']));
-                let temperatures = data.map(item => item['temperature']);
-                let humidity = data.map(item => item['humidity']);
-                let co2 = data.map(item => item['co2']);
+                let timesall = data.map(item => new Date(item['date'] + ' ' + item['time']));
+                let temperaturesall = data.map(item => item['temperature']);
+                let humidityall = data.map(item => item['humidity']);
+                let co2all = data.map(item => item['co2']);
+
+                let times = timesall.slice(-20);
+                let humidity = humidityall.slice(-20);
+                let temperatures = temperaturesall.slice(-20);
+                let co2 = co2all.slice(-20);
 
                 let temperatureCanvas = document.createElement("canvas");
                 let humidityCanvas = document.createElement("canvas");
@@ -932,9 +945,10 @@
                 let humidityCanvasArea = document.createElement("canvas");
                 let co2CanvasArea = document.createElement("canvas");
 
-                let uniqueTemperatures = temperatures.filter(onlyUnique);
-                let uniqueHumidity = humidity.filter(onlyUnique);
-                let uniqueCo2 = co2.filter(onlyUnique);
+                let temperatureCanvasModern = document.createElement("canvas");
+                let humidityCanvasModern = document.createElement("canvas");
+                let co2CanvasModern = document.createElement("canvas");
+
 
                 chartsContainer.appendChild(temperatureCanvas);
                 chartsContainer.appendChild(humidityCanvas);
@@ -943,6 +957,10 @@
                 chartsContainerArea.appendChild(temperatureCanvasArea);
                 chartsContainerArea.appendChild(humidityCanvasArea);
                 chartsContainerArea.appendChild(co2CanvasArea);
+
+                chartsContainerModern.appendChild(temperatureCanvasModern);
+                chartsContainerModern.appendChild(humidityCanvasModern);
+                chartsContainerModern.appendChild(co2CanvasModern);
 
                 let temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
                   type: "line",
@@ -953,8 +971,9 @@
                         label: "Температура",
                         backgroundColor: "red",
                         borderColor: "#FFA07A",
+                        tension: 0.4,
                         data: temperatures,
-                        tension: 0.4
+
                       },
                     ]
                   },
@@ -964,9 +983,9 @@
                     plugins:{
                       legend:{
                         labels:{
-                          font:{
-                            size:16
-                          }
+                          // font:{
+                          //   size:16
+                          // }
                         }
                       }
                     },
@@ -983,12 +1002,12 @@
                         }
                       },
                       y:{
-                        ticks:{
-                          font: {
-                            size:16,
-                          },
-                          color: '#009FE3'
-                        }
+                        // ticks:{
+                        //   font: {
+                        //     size:16,
+                        //   },
+                        //   color: '#009FE3'
+                        // }
                       }
                     },
                   }
@@ -1013,9 +1032,9 @@
                     plugins:{
                       legend:{
                         labels:{
-                          font:{
-                            size:16
-                          }
+                          // font:{
+                          //   size:16
+                          // }
                         }
                       }
                     },
@@ -1032,12 +1051,12 @@
                         }
                       },
                       y:{
-                        ticks:{
-                          font: {
-                            size:16,
-                          },
-                          color: '#009FE3'
-                        }
+                        // ticks:{
+                        //   font: {
+                        //     size:16,
+                        //   },
+                        //   color: '#009FE3'
+                        // }
                       }
                     },
                   }
@@ -1052,8 +1071,9 @@
                         label: "СО2",
                         backgroundColor: "green",
                         borderColor: "lightgreen",
+                        tension: 0.4,
                         data: co2,
-                        tension: 0.4
+
                       },
                     ]
                   },
@@ -1062,9 +1082,9 @@
                     plugins:{
                       legend:{
                         labels:{
-                          font:{
-                            size:16
-                          }
+                          // font:{
+                          //   size:16
+                          // }
                         }
                       }
                     },
@@ -1080,158 +1100,214 @@
                           color: 'ccc'
                         }
                       },
-                      y:{
-                        ticks:{
-                          font: {
-                            size:16,
-                          },
-                          color: '#009FE3'
-                        }
-                      }
+                      // y:{
+                      //   ticks:{
+                      //     font: {
+                      //       size:16,
+                      //     },
+                      //     color: '#009FE3'
+                      //   }
+                      // }
                     },
                   }
                 });
+
+                let uniqueDays = [...new Set(data.map(item => item['date']))].slice(-7);
+
+                // Для каждого дня вычислим среднее значение каждого из параметров
+                let averageTemperatures = [];
+                let averageHumidity = [];
+                let averageCo2 = [];
+
+                for (let day of uniqueDays) {
+                    let dayData = data.filter(item => item['date'] === day);
+
+                    let totalTemperature = 0;
+                    let totalHumidity = 0;
+                    let totalCo2 = 0;
+
+                    for (let item of dayData) {
+                        totalTemperature += item['temperature'];
+                        totalHumidity += item['humidity'];
+                        totalCo2 += item['co2'];
+                    }
+
+                    averageTemperatures.push(totalTemperature / dayData.length);
+                    averageHumidity.push(totalHumidity / dayData.length);
+                    averageCo2.push(totalCo2 / dayData.length);
+                }
+
                 let temperatureChartInstanceArea = new Chart(temperatureCanvasArea.getContext('2d'), {
-                  type: "bar",
-                  data: {
-                    labels: times,
-                    datasets: [
-                      {
-                        label: "Температура",
-                        backgroundColor: "red",
-                        borderColor: "#FFA07A",
-                        data: uniqueTemperatures
-                      },
-                    ]
-                  },
-                  options:{
-                    maintainAspectRatio: false,
-                    plugins:{
-                      legend:{
-                        labels:{
-                          font:{
-                            size:16
-                          }
-                        }
+                      type: 'line',
+                      data: {
+                          labels: uniqueDays,
+                          datasets: [{
+                              label: 'Средняя температура 7 дней',
+                              data: averageTemperatures,
+                              backgroundColor: "red",
+                              borderColor: "#FFA07A",
+                              tension: 0.4,
+                              fill: false,
+
+                          }]
                       }
-                    },
-                    scales:{
-                      x:{
-                        display: false,
-                        ticks: {
-                          font:{
-                            size: 40,
-                          },
-                        },
-                        grid:{
-                          color: 'ccc'
-                        }
-                      },
-                      y:{
-                        ticks:{
-                          font: {
-                            size:16,
-                          },
-                          color: '#009FE3'
-                        }
-                      }
-                    },
-                  }
                 });
 
                 let humidityChartInstanceArea = new Chart(humidityCanvasArea.getContext('2d'), {
-                  type: "bar",
-                  data: {
-                    labels: times,
-                    datasets: [
-                      {
-                        label: "Влажность",
-                        backgroundColor: "blue",
-                        borderColor: "#009FE3",
-                        data: uniqueHumidity
-                      },
-                    ]
-                  },
-                  options:{
-                    maintainAspectRatio: false,
-                    plugins:{
-                      legend:{
-                        labels:{
-                          font:{
-                            size:16
-                          }
-                        }
-                      }
-                    },
-                    scales:{
-                      x:{
-                        display: false,
-                        ticks: {
-                          font:{
-                            size: 40,
-                          },
-                        },
-                        grid:{
-                          color: 'ccc'
-                        }
-                      },
-                      y:{
-                        ticks:{
-                          font: {
-                            size:16,
-                          },
-                          color: '#009FE3'
-                        }
-                      }
-                    },
-                  }
+                    type: 'line',
+                    data: {
+                        labels: uniqueDays,
+                        datasets: [{
+                            label: 'Средняя влажность 7 дней',
+                            data: averageHumidity,
+                            fill: false,
+                            backgroundColor: "blue",
+                            borderColor: "#009FE3",
+                            tension: 0.4
+                        }]
+                    }
                 });
 
                 let co2ChartInstanceArea = new Chart(co2CanvasArea.getContext('2d'), {
-                  type: "bar",
+                  type: 'line',
                   data: {
-                    labels: times,
-                    datasets: [
-                      {
-                        label: "СО2",
-                        backgroundColor: "green",
-                        borderColor: "lightgreen",
-                        data: uniqueCo2
-                      },
-                    ]
-                  },
-                  options:{
-                    maintainAspectRatio: false,
-                    plugins:{
-                      legend:{
-                        labels:{
-                          font:{
-                            size:16
-                          }
-                        }
-                      }
+                      labels: uniqueDays,
+                      datasets: [{
+                          label: 'Средний уровень CO2 7 дней',
+                          data: averageCo2,
+                          backgroundColor: "green",
+                          borderColor: "lightgreen",
+                          tension: 0.4,
+                          fill: false
+                      }]
+                  }
+
+                });
+                let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+                let dataByMonth = data.reduce((acc, item) => {
+                    let date = new Date(item['date']);
+                    let month = monthNames[date.getMonth()];
+                    let year = date.getFullYear();
+
+                    let monthYear = `${month} ${year}`;
+
+                    if (!acc[monthYear]) {
+                        acc[monthYear] = {
+                            temperature: [],
+                            humidity: [],
+                            co2: [],
+                        };
+                    }
+
+                    acc[monthYear].temperature.push(item['temperature']);
+                    acc[monthYear].humidity.push(item['humidity']);
+                    acc[monthYear].co2.push(item['co2']);
+
+                    return acc;
+                }, {});
+
+                let months = Object.keys(dataByMonth);
+                let averageTemperaturesByMonth = months.map(month => average(dataByMonth[month].temperature));
+                let averageHumidityByMonth = months.map(month => average(dataByMonth[month].humidity));
+                let averageCo2ByMonth = months.map(month => average(dataByMonth[month].co2));
+
+
+                let temperatureChartInstanceModern = new Chart(temperatureCanvasModern.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Средняя температура',
+                                data: averageTemperaturesByMonth,
+                                backgroundColor: '#FFA07A',
+                            },
+                            {
+                                label: 'Средняя влажность',
+                                data: averageHumidityByMonth,
+                                backgroundColor: '#009FE3',
+                            },
+                        ]
                     },
-                    scales:{
-                      x:{
-                        display: false,
-                        ticks: {
-                          font:{
-                            size: 40,
-                          },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
                         },
-                        grid:{
-                          color: 'ccc'
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Средние показатели по месяцам'
+                            }
                         }
-                      },
-                      y:{
-                        ticks:{
-                          font: {
-                            size:16,
-                          },
-                          color: '#009FE3'
-                        }
-                      }
                     },
+                });
+                function average(arr) {
+                    return arr.reduce((a, b) => a + b, 0) / arr.length;
+                }
+
+
+                let humidityChartInstanceModern = new Chart(humidityCanvasModern.getContext('2d'), {
+                  type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Средний уровень CO2',
+                                data: averageCo2ByMonth,
+                                backgroundColor: 'lightgreen',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Средние показатели по месяцам'
+                            }
+                        }
+                    },
+                });
+                let co2ChartInstanceModern = new Chart(co2CanvasModern.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: uniqueDays,
+                      datasets: [{
+                          label: 'Изменение температуры',
+                          data: averageTemperatures,
+                          backgroundColor: "red",
+                          borderColor: "#FFA07A",
+                          tension: 0.4,
+                          fill: false,
+                      }, {
+                          label: 'Изменение влажности',
+                          data: averageHumidity,
+                          backgroundColor: "blue",
+                          borderColor: "#009FE3",
+                          tension: 0.4,
+                          fill: false
+                      }, {
+                          label: 'Изменение уровня CO2',
+                          data: averageCo2,
+                          backgroundColor: "green",
+                          borderColor: "lightgreen",
+                          tension: 0.4,
+                          fill: false
+                      }]
                   }
                 });
               });
