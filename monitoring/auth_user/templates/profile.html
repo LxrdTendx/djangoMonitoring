@@ -328,6 +328,8 @@
       /*padding: 10px;*/
     }
     canvas{
+      max-height: 200px !important;
+      max-width: 400px !important;
       margin: 0;
       padding: 0;
       font-size: 40px;
@@ -346,6 +348,10 @@
     .charts-block{
       display: flex;
       width: 1308px;
+    }
+    h3, h2{
+      font-family: 'Inter',sans-serif;
+      color: #009FE3;
     }
   </style>
 
@@ -373,53 +379,58 @@
           <div class="logout-icon"></div>
       </a>
     </div>
+    <div>
+      <div id="floor-container" >
+        <div style="display: flex; margin-top: 46px">
+          <div class="block-date-time">
+            <img src="{% static 'def_icon.png' %}" class="sensors_icon_type" id="sensors_icon_type">
+            <div>
+              <p id="sensor">Вид датчика</p>
+              <p id="sensor-info-type">Параметры измерения датчика</p>
+              <div class="date_time-block">
+                <p id="sensor-date">Дата измерения</p>
+                <p id="sensor-time">Время измерения</p>
+              </div>
+            </div>
 
-    <div id="floor-container" >
-      <div style="display: flex; margin-top: 46px">
-        <div class="block-date-time">
-          <img src="{% static 'def_icon.png' %}" class="sensors_icon_type" id="sensors_icon_type">
-          <div>
-            <p id="sensor">Вид датчика</p>
-            <p id="sensor-info-type">Параметры измерения датчика</p>
-            <div class="date_time-block">
-              <p id="sensor-date">Дата измерения</p>
-              <p id="sensor-time">Время измерения</p>
+          </div>
+          <div class="block-sensor-info">
+            <p class="info-sensors">Показатели</p>
+            <div class="params">
+              <p id="hum">%</p>
+              <p id="co2">ppm</p>
+              <p id="temp">℃</p>
+            </div>
+            <p id="params-stats"></p>
+          </div>
+          <div class="block-errors">
+            <ul id="error-list" style="overflow-y: scroll; max-height: 300px; color: red">
+            </ul>
+          </div>
+        </div>
+        <div class="main-sector">
+          <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none; ">
+          <div id="sensors-container" style="position: absolute; margin-top:285px; top: 0; left: 0; display: none; "></div>
+        </div>
+          <p id="sensor-name"></p>
+          <div class="charts-block" style="zoom:133%">
+            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
+                <canvas id="humidityChart"></canvas>
+            </div>
+            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
+                <canvas id="co2Chart"></canvas>
             </div>
           </div>
 
-        </div>
-        <div class="block-sensor-info">
-          <p class="info-sensors">Показатели</p>
-          <div class="params">
-            <p id="hum">%</p>
-            <p id="co2">ppm</p>
-            <p id="temp">℃</p>
-          </div>
-          <p id="params-stats"></p>
-        </div>
-        <div class="block-errors">
-          <ul id="error-list" style="overflow-y: scroll; max-height: 300px; color: red">
-          </ul>
-        </div>
-      </div>
-      <div class="main-sector">
-        <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none; ">
-        <div id="sensors-container" style="position: absolute; margin-top:332px; top: 0; left: 0; display: none; "></div>
-      </div>
-        <p id="sensor-name"></p>
-        <div class="charts-block" style="zoom:133%">
-          <div class="chart-container" style="position: relative; height:30vh; width:40vw">
-              <canvas id="temperatureChart"></canvas>
-          </div>
-          <div class="chart-container" style="position: relative; height:30vh; width:40vw">
-              <canvas id="humidityChart"></canvas>
-          </div>
-          <div class="chart-container" style="position: relative; height:30vh; width:40vw">
-              <canvas id="co2Chart"></canvas>
-          </div>
-        </div>
 
+      </div>
+      <div id="statistic" style="zoom:133%; display: none"></div>
     </div>
+
+
 
 
   </div>
@@ -458,18 +469,21 @@
       graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-none.svg' %}') no-repeat";
       // Делаем #floor-container видимым
       document.querySelector("#floor-container").style.display = "block";
+      document.querySelector("#statistic").style.display = "none"
     } else {
       // Если класса 'active' нет, добавляем его
       graphLink.classList.add('active');
       graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-active.svg' %}') no-repeat";
       // Скрываем #floor-container
       document.querySelector("#floor-container").style.display = "none";
+      document.querySelector("#statistic").style.display = "block"
     }
   });
 
   document.querySelectorAll('.floor-button').forEach(function(button) {
     button.addEventListener('click', function(event) {
       document.querySelector("#floor-container").style.display = "block";
+      document.querySelector("#statistic").style.display = "none"
       var imageFile = event.target.getAttribute('data-image');
       var imageUrl = staticUrl + "{{ user.username }}/объект " + imageFile;
       var imageElement = document.getElementById('floor-image');
@@ -615,7 +629,7 @@
                         .then(data => {
                             let times = data.map(item => new Date(item['date'] + ' ' + item['time']));
                             let temperatures = data.map(item => item['temperature']);
-                            times.reverse();
+
                             let humidity= data.map(item => item['humidity']);
                             let co2 = data.map(item => item['co2']);
                             // document.getElementById('sensor-name').innerText = times + '\n' + temperatures;
@@ -850,6 +864,210 @@
       });
   }
   checkForCriticalValues();
+  function generateChartsForSensors() {
+    let floorsContainer = document.querySelector("#statistic");
+
+    fetch(staticUrl + "{{ user.username }}/sensors.json")
+      .then(response => response.json())
+      .then(data => {
+        let floors = Object.keys(data);
+
+        floors.forEach(floor => {
+          let floorDiv = document.createElement("div");
+          floorDiv.id = "floor-" + floor.split(".")[0]; // отсекаем ".png"
+          floorsContainer.appendChild(floorDiv);
+
+          let floorTitle = document.createElement("h2");
+          floorTitle.textContent = "Этаж " + floor.split(".")[0]; // отсекаем ".png"
+          floorTitle.style.marginLeft = '20px';
+          floorDiv.appendChild(floorTitle);
+
+          let sensors = data[floor];
+
+          sensors.forEach(sensor => {
+            let sensorDiv = document.createElement("div");
+            sensorDiv.id = sensor['sensor_name'];
+            floorDiv.appendChild(sensorDiv);
+
+            let sensorTitle = document.createElement("h3");
+            sensorTitle.textContent = "Датчик " + sensor['sensor_name'];
+            sensorTitle.style.marginLeft = '20px';
+            sensorDiv.appendChild(sensorTitle);
+
+            let chartsContainer = document.createElement("div");  // новый div для графиков
+            chartsContainer.style.display = "flex";
+            chartsContainer.style.minHeight = '200px';
+            sensorDiv.appendChild(chartsContainer);
+
+            fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+              .then(response => response.json())
+              .then(data => {
+                let times = data.map(item => new Date(item['date'] + ' ' + item['time']));
+                let temperatures = data.map(item => item['temperature']);
+                let humidity = data.map(item => item['humidity']);
+                let co2 = data.map(item => item['co2']);
+
+                let temperatureCanvas = document.createElement("canvas");
+                let humidityCanvas = document.createElement("canvas");
+                let co2Canvas = document.createElement("canvas");
+
+
+
+                chartsContainer.appendChild(temperatureCanvas);
+                chartsContainer.appendChild(humidityCanvas);
+                chartsContainer.appendChild(co2Canvas);
+
+                let temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
+                  type: "line",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "Температура",
+                        backgroundColor: "red",
+                        borderColor: "#FFA07A",
+                        data: temperatures
+                      },
+                    ]
+                  },
+                  options:{
+                    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'touchend', 'mouseenter', 'mouseleave'],
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          font:{
+                            size:16
+                          }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        ticks:{
+                          font: {
+                            size:16,
+                          },
+                          color: '#009FE3'
+                        }
+                      }
+                    },
+                  }
+                });
+
+                let humidityChartInstance = new Chart(humidityCanvas.getContext('2d'), {
+                  type: "line",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "Влажность",
+                        backgroundColor: "blue",
+                        borderColor: "#009FE3",
+                        data: humidity
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          font:{
+                            size:16
+                          }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        ticks:{
+                          font: {
+                            size:16,
+                          },
+                          color: '#009FE3'
+                        }
+                      }
+                    },
+                  }
+                });
+
+                let co2ChartInstance = new Chart(co2Canvas.getContext('2d'), {
+                  type: "line",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "СО2",
+                        backgroundColor: "green",
+                        borderColor: "lightgreen",
+                        data: co2
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          font:{
+                            size:16
+                          }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        ticks:{
+                          font: {
+                            size:16,
+                          },
+                          color: '#009FE3'
+                        }
+                      }
+                    },
+                  }
+                });
+              });
+          });
+        });
+      });
+  }
+
+  generateChartsForSensors();
 
 
   // Запустить checkForCriticalValues каждую минуту
