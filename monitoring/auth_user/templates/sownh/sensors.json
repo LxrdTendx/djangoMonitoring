@@ -2,26 +2,26 @@
   "объект 01.png": [
     {
       "sensor_name": "test3",
-      "x_coordinate": 220,
-      "y_coordinate": 660,
+      "x_coordinate": 247,
+      "y_coordinate": 596,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test4",
-      "x_coordinate": 551,
-      "y_coordinate": 338,
+      "x_coordinate": 816,
+      "y_coordinate": 603,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test2",
-      "x_coordinate": 880,
-      "y_coordinate": 86,
+      "x_coordinate": 1181,
+      "y_coordinate": 351,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test1",
-      "x_coordinate": 1574,
-      "y_coordinate": 89,
+      "x_coordinate": 1417,
+      "y_coordinate": 112,
       "sensor_type": "mult"
     }
   ],
