@@ -409,7 +409,7 @@
           </div>
         </div>
         <div class="main-sector">
-          <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none; ">
+          <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none;">
           <div id="sensors-container" style="position: absolute; margin-top:285px; top: 0; left: 0; display: none; "></div>
         </div>
           <p id="sensor-name"></p>
@@ -427,7 +427,11 @@
 
 
       </div>
-      <div id="statistic" style="zoom:133%; display: none"></div>
+      <div id="statistic" style="zoom:133%; display: none">
+<!--        <input type="text" id="floorInput" placeholder="Введите номер этажа">-->
+<!--        <button id="filterButton">Фильтровать</button>-->
+      </div>
+
     </div>
 
 
@@ -442,6 +446,21 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
 
+<script>
+    document.getElementById('filterButton').addEventListener('click', function() {
+        let floorNumber = document.getElementById('floorInput').value;
+        let floorObjects = document.querySelectorAll('div[id^="floor-"]'); // выбираем все div, id которых начинается с "floor-"
+
+        floorObjects.forEach(floorObject => {
+            // если id элемента не равен "floor-объект " + введенный номер этажа, скрываем элемент
+            if (floorObject.id !== "floor-объект " + floorNumber) {
+                floorObject.style.display = 'none';
+            } else {
+                floorObject.style.display = 'block';
+            }
+        });
+    });
+</script>
 
 <script>
   var staticUrl = "{% get_static_prefix %}";
