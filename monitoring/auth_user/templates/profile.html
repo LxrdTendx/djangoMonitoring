@@ -652,7 +652,8 @@
                                         label: "Температура",
                                         backgroundColor: "red",
                                         borderColor: "#FFA07A",
-                                        data: temperatures
+                                        data: temperatures,
+                                        tension: 0.4
                                       },
                                    ]
                                 },
@@ -704,7 +705,8 @@
                                         label: "Влажность",
                                         backgroundColor: "blue",
                                         borderColor: "#009FE3",
-                                        data: humidity
+                                        data: humidity,
+                                        tension: 0.4
                                       },
                                    ]
                                 },
@@ -755,7 +757,8 @@
                                         label: "СО2",
                                         backgroundColor: "green",
                                         borderColor: "lightgreen",
-                                        data: co2
+                                        data: co2,
+                                        tension: 0.4
                                       },
                                    ]
                                 },
@@ -864,6 +867,9 @@
       });
   }
   checkForCriticalValues();
+  function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+  }
   function generateChartsForSensors() {
     let floorsContainer = document.querySelector("#statistic");
 
@@ -880,6 +886,7 @@
           let floorTitle = document.createElement("h2");
           floorTitle.textContent = "Этаж " + floor.split(".")[0]; // отсекаем ".png"
           floorTitle.style.marginLeft = '20px';
+          floorTitle.style.marginTop = '50px';
           floorDiv.appendChild(floorTitle);
 
           let sensors = data[floor];
@@ -894,10 +901,19 @@
             sensorTitle.style.marginLeft = '20px';
             sensorDiv.appendChild(sensorTitle);
 
+            let graphContainer = document.createElement("div");  // div для всех графов
+            sensorDiv.appendChild(graphContainer);
+
             let chartsContainer = document.createElement("div");  // новый div для графиков
             chartsContainer.style.display = "flex";
             chartsContainer.style.minHeight = '200px';
-            sensorDiv.appendChild(chartsContainer);
+            graphContainer.appendChild(chartsContainer);
+
+            let chartsContainerArea = document.createElement("div");  // новый div для графиков
+            chartsContainerArea.style.display = "flex";
+            chartsContainerArea.style.minHeight = '200px';
+            chartsContainerArea.style.marginTop = '20px';
+            graphContainer.appendChild(chartsContainerArea);
 
             fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
               .then(response => response.json())
@@ -912,10 +928,21 @@
                 let co2Canvas = document.createElement("canvas");
 
 
+                let temperatureCanvasArea = document.createElement("canvas");
+                let humidityCanvasArea = document.createElement("canvas");
+                let co2CanvasArea = document.createElement("canvas");
+
+                let uniqueTemperatures = temperatures.filter(onlyUnique);
+                let uniqueHumidity = humidity.filter(onlyUnique);
+                let uniqueCo2 = co2.filter(onlyUnique);
 
                 chartsContainer.appendChild(temperatureCanvas);
                 chartsContainer.appendChild(humidityCanvas);
                 chartsContainer.appendChild(co2Canvas);
+
+                chartsContainerArea.appendChild(temperatureCanvasArea);
+                chartsContainerArea.appendChild(humidityCanvasArea);
+                chartsContainerArea.appendChild(co2CanvasArea);
 
                 let temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
                   type: "line",
@@ -926,7 +953,8 @@
                         label: "Температура",
                         backgroundColor: "red",
                         borderColor: "#FFA07A",
-                        data: temperatures
+                        data: temperatures,
+                        tension: 0.4
                       },
                     ]
                   },
@@ -975,7 +1003,8 @@
                         label: "Влажность",
                         backgroundColor: "blue",
                         borderColor: "#009FE3",
-                        data: humidity
+                        data: humidity,
+                        tension: 0.4
                       },
                     ]
                   },
@@ -1023,7 +1052,151 @@
                         label: "СО2",
                         backgroundColor: "green",
                         borderColor: "lightgreen",
-                        data: co2
+                        data: co2,
+                        tension: 0.4
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          font:{
+                            size:16
+                          }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        ticks:{
+                          font: {
+                            size:16,
+                          },
+                          color: '#009FE3'
+                        }
+                      }
+                    },
+                  }
+                });
+                let temperatureChartInstanceArea = new Chart(temperatureCanvasArea.getContext('2d'), {
+                  type: "bar",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "Температура",
+                        backgroundColor: "red",
+                        borderColor: "#FFA07A",
+                        data: uniqueTemperatures
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          font:{
+                            size:16
+                          }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        ticks:{
+                          font: {
+                            size:16,
+                          },
+                          color: '#009FE3'
+                        }
+                      }
+                    },
+                  }
+                });
+
+                let humidityChartInstanceArea = new Chart(humidityCanvasArea.getContext('2d'), {
+                  type: "bar",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "Влажность",
+                        backgroundColor: "blue",
+                        borderColor: "#009FE3",
+                        data: uniqueHumidity
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          font:{
+                            size:16
+                          }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        ticks:{
+                          font: {
+                            size:16,
+                          },
+                          color: '#009FE3'
+                        }
+                      }
+                    },
+                  }
+                });
+
+                let co2ChartInstanceArea = new Chart(co2CanvasArea.getContext('2d'), {
+                  type: "bar",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "СО2",
+                        backgroundColor: "green",
+                        borderColor: "lightgreen",
+                        data: uniqueCo2
                       },
                     ]
                   },
@@ -1072,6 +1245,7 @@
 
   // Запустить checkForCriticalValues каждую минуту
   setInterval(checkForCriticalValues, 60000);
+  setInterval(generateChartsForSensors, 60000)
 
 </script>
 {% endblock %}
