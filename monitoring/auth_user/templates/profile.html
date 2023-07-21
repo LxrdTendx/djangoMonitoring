@@ -338,7 +338,7 @@
       color: white;
       display: none;
       margin-left: 23px;
-      border-radius: 15px;
+      border-radius: 5px;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
     }
@@ -651,10 +651,10 @@
                             let humidityall = data.map(item => item['humidity']);
                             let co2all = data.map(item => item['co2']);
 
-                            let times = timesall.slice(-35);
-                            let humidity = humidityall.slice(-35);
-                            let temperatures = temperaturesall.slice(-35);
-                            let co2 = co2all.slice(-35);
+                            let times = timesall.slice(-20);
+                            let humidity = humidityall.slice(-20);
+                            let temperatures = temperaturesall.slice(-20);
+                            let co2 = co2all.slice(-20);
                             // document.getElementById('sensor-name').innerText = times + '\n' + temperatures;
                             let temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
                             let humidityCtx = document.getElementById('humidityChart').getContext('2d');
@@ -891,8 +891,14 @@
   }
   checkForCriticalValues();
 
+
+
   function generateChartsForSensors() {
     let floorsContainer = document.querySelector("#statistic");
+
+
+    // Очистка старых графиков
+    floorsContainer.innerHTML = '';
 
     fetch(staticUrl + "{{ user.username }}/sensors.json")
       .then(response => response.json())
@@ -981,7 +987,7 @@
                 chartsContainerModern.appendChild(humidityCanvasModern);
                 chartsContainerModern.appendChild(co2CanvasModern);
 
-                let temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
+                temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
                   type: "line",
                   data: {
                     labels: times,
@@ -1032,7 +1038,7 @@
                   }
                 });
 
-                let humidityChartInstance = new Chart(humidityCanvas.getContext('2d'), {
+                humidityChartInstance = new Chart(humidityCanvas.getContext('2d'), {
                   type: "line",
                   data: {
                     labels: times,
@@ -1081,7 +1087,7 @@
                   }
                 });
 
-                let co2ChartInstance = new Chart(co2Canvas.getContext('2d'), {
+                co2ChartInstance = new Chart(co2Canvas.getContext('2d'), {
                   type: "line",
                   data: {
                     labels: times,
