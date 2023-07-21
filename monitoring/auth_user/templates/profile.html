@@ -1341,6 +1341,15 @@
   // Запустить checkForCriticalValues каждую минуту
   setInterval(checkForCriticalValues, 60000);
   setInterval(generateChartsForSensors, 60000)
+  function clearErrors() {
+    let errorBlock = document.querySelector('.block-errors');
+    while (errorBlock.firstChild) {
+      errorBlock.removeChild(errorBlock.firstChild);
+    }
+  }
+
+  // Очистить блок с ошибками каждые 20 минут
+  setInterval(clearErrors, 1200000);
 
 </script>
 {% endblock %}
