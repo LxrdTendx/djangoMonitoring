@@ -600,7 +600,7 @@
                             isCritical = true;
                           }
 
-                          if (data['co2'] >= 350 && data['co2'] <= 400) {
+                          if (data['co2'] >= 300 && data['co2'] <= 400) {
                             co2Element.style.color = "#39FF27"; // Зеленый
                           } else if (data['co2'] >= 400 && data['co2'] <= 700) {
                             co2Element.style.color = "#FFA500"; // Оранжевый
@@ -868,7 +868,7 @@
                 if (data['temperature'] < 20 || data['temperature'] > 24) {
                   criticalParameters.push('temperature');
                 }
-                if (data['co2'] < 350 || data['co2'] > 700) {
+                if (data['co2'] < 300 || data['co2'] > 700) {
                   criticalParameters.push('co2');
                 }
                 if (data['humidity'] < 40 || data['humidity'] > 60) {
@@ -987,7 +987,7 @@
                 chartsContainerModern.appendChild(humidityCanvasModern);
                 chartsContainerModern.appendChild(co2CanvasModern);
 
-                temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
+                let temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
                   type: "line",
                   data: {
                     labels: times,
@@ -1038,7 +1038,7 @@
                   }
                 });
 
-                humidityChartInstance = new Chart(humidityCanvas.getContext('2d'), {
+                let humidityChartInstance = new Chart(humidityCanvas.getContext('2d'), {
                   type: "line",
                   data: {
                     labels: times,
@@ -1087,7 +1087,7 @@
                   }
                 });
 
-                co2ChartInstance = new Chart(co2Canvas.getContext('2d'), {
+                let co2ChartInstance = new Chart(co2Canvas.getContext('2d'), {
                   type: "line",
                   data: {
                     labels: times,
