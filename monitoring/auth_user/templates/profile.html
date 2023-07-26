@@ -357,7 +357,7 @@
 
   <div class="content-wrapper">
     <div class="side-section">
-      <a href="https://sownh.ru/monitoringsys">
+      <a href="http://45.12.74.4:8000/profile">
         <img class="logo" src="{% static 'logo.png' %}" alt="Logo" >
       </a>
 
@@ -381,7 +381,7 @@
     </div>
     <div>
       <div id="floor-container" >
-        <div style="display: flex; margin-top: 46px">
+        <div id="information-blocks" style="display: flex; margin-top: 46px">
           <div class="block-date-time">
             <img src="{% static 'def_icon.png' %}" class="sensors_icon_type" id="sensors_icon_type">
             <div>
@@ -557,31 +557,52 @@
               sensorImage.appendChild(sensorImgElement);
               sensorButton.appendChild(sensorImage);
 
-              fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
-                .then(response => response.json())
-                .then(data => {
-                  let isCritical = false;
-                  if (data['temperature'] < 20 || data['temperature'] > 24) {
-                    isCritical = true;
-                  }
-                  if (data['co2'] < 350 || data['co2'] > 700) {
-                    isCritical = true;
-                  }
-                  if (data['humidity'] < 40 || data['humidity'] > 60) {
-                    isCritical = true;
-                  }
-                  if (isCritical) {
-                    let overlayDiv = document.createElement('div');
-                    overlayDiv.style.position = 'absolute';
-                    overlayDiv.style.top = '0';
-                    overlayDiv.style.left = '0';
-                    overlayDiv.style.width = '100%';
-                    overlayDiv.style.height = '100%';
-                    overlayDiv.style.borderRadius='5px';
-                    overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
-                    sensorButton.appendChild(overlayDiv);
-                  }
-                });
+
+              // Create overlayDiv outside the interval and fetch
+              let overlayDiv = document.createElement('div');
+              overlayDiv.style.position = 'absolute';
+              overlayDiv.style.top = '0';
+              overlayDiv.style.left = '0';
+              overlayDiv.style.width = '100%';
+              overlayDiv.style.height = '100%';
+              overlayDiv.style.borderRadius='5px';
+              sensorButton.appendChild(overlayDiv);
+
+              function checkSensorData() {
+                  fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+                      .then(response => response.json())
+                      .then(data => {
+                          let isCritical = false;
+
+                          if(data['type'] == 'mult' || data['type'] == 'wet') {
+                              if (data['humidity'] < 40 || data['humidity'] > 60) {
+                                  isCritical = true;
+                              }
+                          }
+
+                          if(data['type'] == 'mult') {
+                              if (data['temperature'] < 20 || data['temperature'] > 24) {
+                                  isCritical = true;
+                              }
+
+                              if (data['co2'] < 350 || data['co2'] > 700) {
+                                  isCritical = true;
+                              }
+                          }
+
+                          if (isCritical) {
+                              overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
+                          } else {
+                              overlayDiv.style.backgroundColor = 'transparent'; // Remove the red color if not critical
+                          }
+                      });
+              }
+
+              // Call function once immediately
+              checkSensorData();
+
+              // Start the interval
+              setInterval(checkSensorData, 10000);
 
               sensorButton.addEventListener('click', (function(sensor) {
                 return function() {
@@ -602,32 +623,45 @@
                           let statsElement = document.getElementById('params-stats');
 
                           let isCritical = false;
+                          if(data['type'] == 'mult') {
+                            if (data['temperature'] >= 20 && data['temperature'] <= 22) {
+                              tempElement.style.color = "#39FF27"; // Зеленый
+                            } else if (data['temperature'] >= 20 && data['temperature'] <= 24) {
+                              tempElement.style.color = "#FFA500"; // Оранжевый
+                            } else {
+                              tempElement.style.color = "#FF564B"; // Красный
+                              isCritical = true;
+                            }
 
-                          if (data['temperature'] >= 20 && data['temperature'] <= 22) {
-                            tempElement.style.color = "#39FF27"; // Зеленый
-                          } else if (data['temperature'] >= 20 && data['temperature'] <= 24) {
-                            tempElement.style.color = "#FFA500"; // Оранжевый
-                          } else {
-                            tempElement.style.color = "#FF564B"; // Красный
-                            isCritical = true;
+                            if (data['co2'] >= 300 && data['co2'] <= 400) {
+                              co2Element.style.color = "#39FF27"; // Зеленый
+                            } else if (data['co2'] >= 400 && data['co2'] <= 700) {
+                              co2Element.style.color = "#FFA500"; // Оранжевый
+                            } else {
+                              co2Element.style.color = "#FF564B"; // Красный
+                              isCritical = true;
+                            }
+                            if (data['humidity'] >= 48 && data['humidity'] <= 52) {
+                              humElement.style.color = "#39FF27"; // Зеленый
+                            } else if (data['humidity'] >= 40 && data['humidity'] <= 60) {
+                              humElement.style.color = "#FFA500"; // Оранжевый
+                            } else {
+                              humElement.style.color = "#FF564B"; // Красный
+                              isCritical = true;
+                            }
                           }
 
-                          if (data['co2'] >= 300 && data['co2'] <= 400) {
-                            co2Element.style.color = "#39FF27"; // Зеленый
-                          } else if (data['co2'] >= 400 && data['co2'] <= 700) {
-                            co2Element.style.color = "#FFA500"; // Оранжевый
-                          } else {
-                            co2Element.style.color = "#FF564B"; // Красный
-                            isCritical = true;
-                          }
-
-                          if (data['humidity'] >= 48 && data['humidity'] <= 52) {
-                            humElement.style.color = "#39FF27"; // Зеленый
-                          } else if (data['humidity'] >= 40 && data['humidity'] <= 60) {
-                            humElement.style.color = "#FFA500"; // Оранжевый
-                          } else {
-                            humElement.style.color = "#FF564B"; // Красный
-                            isCritical = true;
+                          if (data['type'] == 'wet') {
+                            co2Element.style.color = "#39FF27";
+                            tempElement.style.color = "#39FF27";
+                            if (data['humidity'] >= 48 && data['humidity'] <= 52) {
+                              humElement.style.color = "#39FF27"; // Зеленый
+                            } else if (data['humidity'] >= 40 && data['humidity'] <= 60) {
+                              humElement.style.color = "#FFA500"; // Оранжевый
+                            } else {
+                              humElement.style.color = "#FF564B"; // Красный
+                              isCritical = true;
+                            }
                           }
 
                           if (isCritical) {
@@ -642,11 +676,13 @@
                             document.getElementById('sensor').innerText = "Мультидатчик параметров среды";
                             document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность, CO2 и температуру";
                             document.getElementById('sensors_icon_type').src = staticUrl + "mult_icon.png";
-                          } else{
+                          }
+                          if(data['type'] == 'wet'){
                             document.getElementById('sensor').innerText = "Датчик влажности";
                             document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность";
-                            document.getElementById('sensors_icon_type').src = staticUrl + "def_icon.png";
+                            document.getElementById('sensors_icon_type').src = staticUrl + "hum_icon.png";
                           }
+
                           document.getElementById('sensor-name').innerText = "Name: " + data['name'];
                           document.getElementById('sensor-time').innerText = data['time'];
                           document.getElementById('sensor-date').innerText = data['date'];
@@ -1372,8 +1408,9 @@
               .then(response => response.json())
               .then(data => {
                   let isCritical = false;
+
                   if (data['temperature'] < 20 || data['temperature'] > 24) {
-                      isCritical = true;
+                    isCritical = true;
                   }
                   if (data['co2'] < 350 || data['co2'] > 700) {
                       isCritical = true;
@@ -1381,6 +1418,7 @@
                   if (data['humidity'] < 40 || data['humidity'] > 60) {
                       isCritical = true;
                   }
+
                   let overlayDiv = sensorButton.querySelector('div');
                   if (isCritical) {
                       if (!overlayDiv) {
