@@ -27,10 +27,10 @@
   ],
   "объект 02.png": [
     {
-      "sensor_name": "test3",
+      "sensor_name": "test5",
       "x_coordinate": 184,
       "y_coordinate": 388,
-      "sensor_type": "mult"
+      "sensor_type": "wet"
     },
     {
       "sensor_name": "test4",
