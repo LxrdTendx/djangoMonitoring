@@ -676,19 +676,22 @@
                             document.getElementById('sensor').innerText = "Мультидатчик параметров среды";
                             document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность, CO2 и температуру";
                             document.getElementById('sensors_icon_type').src = staticUrl + "mult_icon.png";
+                            tempElement.innerText = "℃:" +data['temperature'];
+                            co2Element.innerText = "ppm:" +data['co2'];
+                            humElement.innerText = "%" + data['humidity'];
                           }
                           if(data['type'] == 'wet'){
                             document.getElementById('sensor').innerText = "Датчик влажности";
                             document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность";
                             document.getElementById('sensors_icon_type').src = staticUrl + "hum_icon.png";
+                            tempElement.innerText = "";
+                            co2Element.innerText = "";
+                            humElement.innerText = "%" + data['humidity'];
                           }
 
                           document.getElementById('sensor-name').innerText = "Name: " + data['name'];
                           document.getElementById('sensor-time').innerText = data['time'];
                           document.getElementById('sensor-date').innerText = data['date'];
-                          tempElement.innerText = "℃:" +data['temperature'];
-                          co2Element.innerText = "ppm:" +data['co2'];
-                          humElement.innerText = "%" + data['humidity'];
                           document.getElementById('sensor-type').innerText = "Type: " + data['type'];
                         });
                       fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
