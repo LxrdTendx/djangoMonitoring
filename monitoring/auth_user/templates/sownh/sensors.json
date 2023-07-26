@@ -2,41 +2,53 @@
   "объект 01.png": [
     {
       "sensor_name": "test3",
-      "x_coordinate": 247,
-      "y_coordinate": 596,
+      "x_coordinate": 135,
+      "y_coordinate": 675,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test4",
-      "x_coordinate": 816,
-      "y_coordinate": 603,
+      "x_coordinate": 776,
+      "y_coordinate": 675,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test2",
-      "x_coordinate": 1181,
-      "y_coordinate": 351,
+      "x_coordinate": 1156,
+      "y_coordinate": 194,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test1",
-      "x_coordinate": 1417,
-      "y_coordinate": 112,
+      "x_coordinate": 1156,
+      "y_coordinate": 451,
       "sensor_type": "mult"
     }
   ],
   "объект 02.png": [
     {
       "sensor_name": "test3",
-      "x_coordinate": 345,
-      "y_coordinate": 678,
+      "x_coordinate": 184,
+      "y_coordinate": 388,
+      "sensor_type": "mult"
+    },
+    {
+      "sensor_name": "test4",
+      "x_coordinate": 691,
+      "y_coordinate": 591,
+      "sensor_type": "mult"
+    },
+    {
+      "sensor_name": "test1",
+      "x_coordinate": 1139,
+      "y_coordinate": 526,
       "sensor_type": "mult"
     },
     {
       "sensor_name": "test2",
-      "x_coordinate": 901,
-      "y_coordinate": 234,
-      "sensor_type": "wet"
+      "x_coordinate": 1200,
+      "y_coordinate": 385,
+      "sensor_type": "mult"
     }
   ]
 }

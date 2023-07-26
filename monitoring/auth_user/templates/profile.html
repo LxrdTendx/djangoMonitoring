@@ -1367,42 +1367,46 @@
   setInterval(clearErrors, 1200000);
 
   function checkSensors() {
-    document.querySelectorAll('.sensor-button').forEach(function(sensorButton) {
-        let sensorName = sensorButton.getAttribute('data-sensor-name');
-        fetch('/get_sensor_data/' + sensorName + '/' + "{{ user.username }}")
-            .then(response => response.json())
-            .then(data => {
-                let isCritical = false;
-                if (data['temperature'] < 20 || data['temperature'] > 24) {
-                    isCritical = true;
-                }
-                if (data['co2'] < 350 || data['co2'] > 700) {
-                    isCritical = true;
-                }
-                if (data['humidity'] < 40 || data['humidity'] > 60) {
-                    isCritical = true;
-                }
-                if (isCritical) {
-                    let overlayDiv = document.createElement('div');
-                    overlayDiv.style.position = 'absolute';
-                    overlayDiv.style.top = '0';
-                    overlayDiv.style.left = '0';
-                    overlayDiv.style.width = '100%';
-                    overlayDiv.style.height = '100%';
-                    overlayDiv.style.borderRadius='5px';
-                    overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
-                    sensorButton.appendChild(overlayDiv);
-                } else {
-                    let overlayDiv = sensorButton.querySelector('div');
-                    if (overlayDiv) {
-                        sensorButton.removeChild(overlayDiv);
-                    }
-                }
-            });
-    });
+      document.querySelectorAll('.sensor-button').forEach(function(sensorButton) {
+          let sensorName = sensorButton.getAttribute('data-sensor-name');
+          fetch('/get_sensor_data/' + sensorName + '/' + "{{ user.username }}")
+              .then(response => response.json())
+              .then(data => {
+                  let isCritical = false;
+                  if (data['temperature'] < 20 || data['temperature'] > 24) {
+                      isCritical = true;
+                  }
+                  if (data['co2'] < 350 || data['co2'] > 700) {
+                      isCritical = true;
+                  }
+                  if (data['humidity'] < 40 || data['humidity'] > 60) {
+                      isCritical = true;
+                  }
+                  let overlayDiv = sensorButton.querySelector('div');
+                  if (isCritical) {
+                      if (!overlayDiv) {
+                          overlayDiv = document.createElement('div');
+                          overlayDiv.style.position = 'absolute';
+                          overlayDiv.style.top = '0';
+                          overlayDiv.style.left = '0';
+                          overlayDiv.style.width = '100%';
+                          overlayDiv.style.height = '100%';
+                          overlayDiv.style.borderRadius='5px';
+                          overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
+                          sensorButton.appendChild(overlayDiv);
+                      }
+                  } else {
+                      if (overlayDiv) {
+                          sensorButton.removeChild(overlayDiv);
+                      }
+                  }
+              });
+      });
   }
+
   // Запускаем функцию checkSensors каждую минуту
   setInterval(checkSensors, 60000);
+
 
 </script>
 {% endblock %}
