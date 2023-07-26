@@ -680,17 +680,17 @@
                             temperatureChartInstance = new Chart(temperatureCtx, {
                                 type: "line",
                                 data: {
-                                   borderColor: "#009FE3",
-                                   labels: times,
-                                   datasets: [
-                                      {
-                                        label: "Температура",
-                                        backgroundColor: "red",
-                                        borderColor: "#FFA07A",
-                                        data: temperatures,
-                                        tension: 0.4
-                                      },
-                                   ]
+                                  labels: times,
+                                  datasets: [
+                                    {
+                                      label: "Температура",
+                                      backgroundColor: "red",
+                                      borderColor: "#FFA07A",
+                                      tension: 0.4,
+                                      data: temperatures,
+
+                                    },
+                                  ]
                                 },
                                 options:{
                                   events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'touchend', 'mouseenter', 'mouseleave'],
@@ -698,9 +698,9 @@
                                   plugins:{
                                     legend:{
                                       labels:{
-                                        font:{
-                                          size:16
-                                        }
+                                        // font:{
+                                        //   size:16
+                                        // }
                                       }
                                     }
                                   },
@@ -717,12 +717,12 @@
                                       }
                                     },
                                     y:{
-                                      ticks:{
-                                        font: {
-                                          size:16,
-                                        },
-                                        color: '#009FE3'
-                                      }
+                                      // ticks:{
+                                      //   font: {
+                                      //     size:16,
+                                      //   },
+                                      //   color: '#009FE3'
+                                      // }
                                     }
                                   },
                                 }
@@ -733,26 +733,25 @@
                             humidityChartInstance = new Chart(humidityCtx, {
                                 type: "line",
                                 data: {
-                                   borderColor: "#009FE3",
-                                   labels: times,
-                                   datasets: [
-                                      {
-                                        label: "Влажность",
-                                        backgroundColor: "blue",
-                                        borderColor: "#009FE3",
-                                        data: humidity,
-                                        tension: 0.4
-                                      },
-                                   ]
+                                  labels: times,
+                                  datasets: [
+                                    {
+                                      label: "Влажность",
+                                      backgroundColor: "blue",
+                                      borderColor: "#009FE3",
+                                      data: humidity,
+                                      tension: 0.4
+                                    },
+                                  ]
                                 },
                                 options:{
                                   maintainAspectRatio: false,
                                   plugins:{
                                     legend:{
                                       labels:{
-                                        font:{
-                                          size:16
-                                        }
+                                        // font:{
+                                        //   size:16
+                                        // }
                                       }
                                     }
                                   },
@@ -769,12 +768,12 @@
                                       }
                                     },
                                     y:{
-                                      ticks:{
-                                        font: {
-                                          size:16,
-                                        },
-                                        color: '#009FE3'
-                                      }
+                                      // ticks:{
+                                      //   font: {
+                                      //     size:16,
+                                      //   },
+                                      //   color: '#009FE3'
+                                      // }
                                     }
                                   },
                                 }
@@ -785,26 +784,26 @@
                             co2ChartInstance = new Chart(co2Ctx, {
                                 type: "line",
                                 data: {
-                                   borderColor: "#009FE3",
-                                   labels: times,
-                                   datasets: [
-                                      {
-                                        label: "СО2",
-                                        backgroundColor: "green",
-                                        borderColor: "lightgreen",
-                                        data: co2,
-                                        tension: 0.4
-                                      },
-                                   ]
+                                  labels: times,
+                                  datasets: [
+                                    {
+                                      label: "СО2",
+                                      backgroundColor: "green",
+                                      borderColor: "lightgreen",
+                                      tension: 0.4,
+                                      data: co2,
+
+                                    },
+                                  ]
                                 },
                                 options:{
                                   maintainAspectRatio: false,
                                   plugins:{
                                     legend:{
                                       labels:{
-                                        font:{
-                                          size:16
-                                        }
+                                        // font:{
+                                        //   size:16
+                                        // }
                                       }
                                     }
                                   },
@@ -820,14 +819,14 @@
                                         color: 'ccc'
                                       }
                                     },
-                                    y:{
-                                      ticks:{
-                                        font: {
-                                          size:16,
-                                        },
-                                        color: '#009FE3'
-                                      }
-                                    }
+                                    // y:{
+                                    //   ticks:{
+                                    //     font: {
+                                    //       size:16,
+                                    //     },
+                                    //     color: '#009FE3'
+                                    //   }
+                                    // }
                                   },
                                 }
                               });
