@@ -905,35 +905,40 @@
             fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
               .then(response => response.json())
               .then(data => {
-                let criticalParameters = [];
-                if (data['temperature'] === 0 && data['co2'] === 0 && data['humidity'] === 0) {
-                  let errorBlock = document.querySelector('.block-errors');
-                  let errorItem = document.createElement('ul');
-                  let currentTime = new Date();
-                  let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
-                  errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr} неисправен`;
-                  errorBlock.prepend(errorItem);
-                  return;
-                }
-                if (data['temperature'] < 20 || data['temperature'] > 24) {
-                  criticalParameters.push('temperature');
-                }
-                if (data['co2'] < 300 || data['co2'] > 700) {
-                  criticalParameters.push('co2');
-                }
-                if (data['humidity'] < 40 || data['humidity'] > 60) {
-                  criticalParameters.push('humidity');
-                }
+                  let criticalParameters = [];
+                  if (data['temperature'] === 0 && data['co2'] === 0 && data['humidity'] === 0) {
+                      let errorBlock = document.querySelector('.block-errors');
+                      let errorItem = document.createElement('ul');
+                      let currentTime = new Date();
+                      let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
+                      errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr} неисправен`;
+                      errorBlock.prepend(errorItem);
+                      return;
+                  }
+                  if (data['type'] === 'mult') {
+                      if (data['temperature'] < 20 || data['temperature'] > 24) {
+                          criticalParameters.push('temperature');
+                      }
+                      if (data['co2'] < 300 || data['co2'] > 700) {
+                          criticalParameters.push('co2');
+                      }
+                      if (data['humidity'] < 40 || data['humidity'] > 60) {
+                          criticalParameters.push('humidity');
+                      }
+                  } else if (data['type'] === 'wet') {
+                      if (data['humidity'] < 40 || data['humidity'] > 60) {
+                          criticalParameters.push('humidity');
+                      }
+                  }
 
-                if (criticalParameters.length > 0) {
-                  let errorBlock = document.querySelector('.block-errors');
-                  let errorItem = document.createElement('ul');
-                  let currentTime = new Date();
-                  let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
-                  errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr} критичные показатели: ${criticalParameters.join(', ')}`;
-                  errorBlock.prepend(errorItem);
-                }
-
+                  if (criticalParameters.length > 0) {
+                      let errorBlock = document.querySelector('.block-errors');
+                      let errorItem = document.createElement('ul');
+                      let currentTime = new Date();
+                      let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
+                      errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr} критичные показатели: ${criticalParameters.join(', ')}`;
+                      errorBlock.prepend(errorItem);
+                  }
               });
           });
         });
