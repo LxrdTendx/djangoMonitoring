@@ -68,7 +68,7 @@ def get_sensor_data_history(request, sensor_name, username):
     )
 
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC LIMIT 10000", (sensor_name,))
+    cur.execute(f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC", (sensor_name,))
     rows = cur.fetchall()
 
     data = []
