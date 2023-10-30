@@ -1,67 +1,1419 @@
-{% extends "base_generic.html" %}
 {% load static %}
 
-
 {% block content %}
-  <h2>Welcome, {{ user.username }}!</h2>
-  <a href="{% url 'logout' %}">Logout</a>
+  <head>
+    <title>Welcome, {{ user.username }}!</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+  </head>
+  <style>
+    .side-section {
+      min-width: 134px;
+      max-width: 134px;
+      min-height: 750px;
+      max-height: 750px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 0px 0px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  {% for number in floor_numbers %}
-    <button class="floor-button" data-image="{{ number }}.png">{{ number }}</button>
-  {% endfor %}
+
+
+    .logo {
+      margin-top: 29px;
+    }
+
+    .separator {
+      width: 102px;
+      height: 0;
+      border: 1px solid #1F1F20;
+      margin-top: 25px;
+    }
+
+
+    .floor-button {
+      width: 60px;
+      height: 60px;
+      background: #1F1F20;
+      color: #383639;
+      border: none;
+      box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 30px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 29px;
+      flex-shrink: 0;
+    }
+
+    .floor-button:hover {
+      background: #FFFFFF;
+      color: #1F1F20;
+      transition: 1s;
+      box-shadow: none;
+    }
+
+    .floor-button:focus {
+      background: #FFFFFF;
+      color: #1F1F20;
+      box-shadow: none;
+    }
+
+    .floor-button.selected {
+      background: #FFFFFF;
+      color: #1F1F20;
+    }
+
+    .floor-buttons::-webkit-scrollbar {
+      display: none; /* for Chrome, Safari, Opera */
+    }
+
+    .floor-buttons {
+      -ms-overflow-style: none;  /* for IE and Edge */
+      scrollbar-width: none;  /* for Firefox */
+      height: 600px;
+      overflow-y: scroll;  /* changed from 'hidden' to 'scroll' */
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    body{
+      zoom: 75%;
+      background-color: #1F1F20;
+      margin: 0;
+    }
+
+    .content-wrapper {
+      display: flex;
+      position: relative;
+    }
+
+    .logout-link {
+      margin-bottom: 24px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      color: #FFFFFF;
+
+      bottom:0;
+    }
+
+    .logout-icon {
+        width: 41px; /* Установите размер изображения */
+        height: 37px;
+        background: url("{% static 'Logout.svg' %}") no-repeat;
+    }
+
+    .logout-link:hover .logout-icon {
+        transition: 0.5s;
+        background: url("{% static 'Logout-hover.svg' %}") no-repeat;
+    }
+
+    .graph-link {
+      margin-bottom: 20px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      color: #FFFFFF;
+      bottom:0;
+    }
+
+    .graph-icon {
+        width: 61px; /* Установите размер изображения */
+        height: 61px;
+        background: url("{% static 'graph-none.svg' %}") no-repeat;
+    }
+
+    .graph-link:hover .graph-icon {
+        transition: 0.5s;
+        background: url("{% static 'graph-active.svg' %}") no-repeat;
+    }
+
+    .graph-link.active .graph-icon{
+      transition: 0.5s;
+      background: url("{% static 'graph-active.svg' %}") no-repeat;
+    }
+
+    .sensor-button {
+      background: none;
+      border: none;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+    }
+
+    .sensor-button img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .sensor-button.selected {
+      box-shadow: 0 0 0 4px #009FE3;
+      transition: 0.1s;
+      border-radius: 5px;
+    }
+
+    #sensor-name{
+      margin-left: 23px;
+      color: white;
+    }
+
+    .block-date-time {
+      width: 650px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+    }
+    .block-sensor-info {
+      width: 650px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+
+    }
+    #floor-container {
+      position: relative;
+      flex-wrap: nowrap; /* This allows the content to wrap if it exceeds the container's width */
+    }
+    #sensor{
+      margin-bottom: 0px;
+      margin-top: 29px;
+      width: 431px;
+      height: 83px;
+      flex-direction: column;
+      flex-shrink: 0;
+      color: var(--main-white, #FFF);
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    #sensor-info-type{
+      width: 378px;
+      margin-top: 19px;
+      color: var(--main-violet, #9960D2);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    #sensor-date{
+      margin-top: 28px;
+      margin-bottom: 0px;
+      width: 120px;
+      color: var(--main-white, #FFF);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    #sensor-time{
+      margin-top: 28px;
+      margin-bottom: 0px;
+      margin-left: 80px;
+      width: 130px;
+      color: var(--main-white, #FFF);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    .date_time-block{
+      display: flex;
+    }
+    .info-sensors{
+      margin-left: 34px;
+      margin-top: 29px;
+      margin-bottom: 0px;
+      width: 499px;
+      height: 52px;
+      flex-direction: column;
+      flex-shrink: 0;
+      color: var(--main-white, #FFF);
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    .params{
+      display: flex;
+      width: 650px;
+      margin-top: 31px;
+    }
+    #hum{
+      margin-left: 34px;
+    }
+    #hum, #co2, #temp{
+      width: 180px;
+      margin-top: 0px;
+      margin-bottom: 0px;
+      color: var(--main-white, #FFF);
+      margin-right: 130px;
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    #params-stats{
+      margin-left: 34px;
+      margin-top: 40px;
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+    }
+    .block-date-time{
+      display: flex;
+    }
+    .sensors_icon_type{
+      margin-top: 42px;
+      margin-left: 38px;
+      margin-right: 27px;
+      height: 140px;
+      width: 140px;
+    }
+    .main-sector{
+      margin-top: 32px;
+    }
+    .block-errors {
+      font-family: 'Inter',sans-serif;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+      height: 250px;
+      width: 371px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      color:red;
+      font-size: 20px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .block-errors::-webkit-scrollbar{
+      width: 0;
+      height: 0;
+    }
+    ul{
+      padding-left: 15px;
+    }
+    .error-message {
+      border: 1px solid red;
+      margin: 5px;
+      /*padding: 10px;*/
+    }
+    canvas{
+      max-height: 200px !important;
+      max-width: 400px !important;
+      margin: 0;
+      padding: 0;
+      font-size: 40px;
+      /*margin-left: -400px;*/
+      background-color: #383639;
+      color: white;
+      display: none;
+      margin-left: 23px;
+      border-radius: 5px;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+    }
+    .critical {
+      filter: brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(7) contrast(0.88);
+    }
+    .charts-block{
+      display: flex;
+      width: 1308px;
+    }
+    h3, h2{
+      font-family: 'Inter',sans-serif;
+      color: #009FE3;
+    }
+  </style>
+
+  <div class="content-wrapper">
+    <div class="side-section">
+      <a href="https://sownh.ru/monitoringsys">
+        <img class="logo" src="{% static 'logo.png' %}" alt="Logo" >
+      </a>
+
+      <hr class="separator">
+      <a class="graph-link" href="#">
+        <div class="graph-icon"></div>
+      </a>
 
 
 
-  <img id="floor-image" src="" alt="Floor image" style="display: none;">
-  <h3>Add sensor</h3>
-  <form id="sensor-form">
-      <label for="sensor-name">Sensor Name:</label><br>
-      <input type="text" id="sensor-name" name="sensor-name"><br>
-      <label for="sensor-type">Sensor Type:</label><br>
-      <select id="sensor-type" name="sensor-type">
-          <option value="mult">Multi-Sensor</option>
-          <option value="wet">Wet-Sensor</option>
-      </select><br>
-      <label for="sensor-x">X-coordinate:</label><br>
-      <input type="number" id="sensor-x" name="sensor-x" min="0"><br>
-      <label for="sensor-y">Y-coordinate:</label><br>
-      <input type="number" id="sensor-y" name="sensor-y" min="0"><br>
-      <input type="submit" value="Add Sensor">
-  </form>
+
+      <div class="floor-buttons">
+        {% for number in floor_numbers %}
+          <button class="floor-button" data-image="{{ number }}.png">{{ number }}</button>
+        {% endfor %}
+      </div>
+
+      <a class="logout-link" href="{% url 'logout' %}" >
+          <div class="logout-icon"></div>
+      </a>
+    </div>
+    <div>
+      <div id="floor-container" >
+        <div style="display: flex; margin-top: 46px">
+          <div class="block-date-time">
+            <img src="{% static 'def_icon.png' %}" class="sensors_icon_type" id="sensors_icon_type">
+            <div>
+              <p id="sensor">Вид датчика</p>
+              <p id="sensor-info-type">Параметры измерения датчика</p>
+              <div class="date_time-block">
+                <p id="sensor-date">Дата измерения</p>
+                <p id="sensor-time">Время измерения</p>
+              </div>
+            </div>
+
+          </div>
+          <div class="block-sensor-info">
+            <p class="info-sensors">Показатели</p>
+            <div class="params">
+              <p id="hum">%</p>
+              <p id="co2">ppm</p>
+              <p id="temp">℃</p>
+            </div>
+            <p id="params-stats"></p>
+          </div>
+          <div class="block-errors">
+            <ul id="error-list" style="overflow-y: scroll; max-height: 300px; color: red">
+            </ul>
+          </div>
+        </div>
+        <div class="main-sector">
+          <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none;">
+          <div id="sensors-container" style="position: absolute; margin-top:285px; top: 0; left: 0; display: none; "></div>
+        </div>
+          <p id="sensor-name"></p>
+          <div class="charts-block" style="zoom:133%">
+            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
+                <canvas id="humidityChart"></canvas>
+            </div>
+            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
+                <canvas id="co2Chart"></canvas>
+            </div>
+          </div>
+
+
+      </div>
+      <div id="statistic" style="zoom:133%; display: none">
+<!--        <input type="text" id="floorInput" placeholder="Введите номер этажа">-->
+<!--        <button id="filterButton">Фильтровать</button>-->
+      </div>
+
+    </div>
+
+
+
+
+  </div>
 
 {% endblock %}
+
+
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+
 <script>
-    var staticUrl = "{% get_static_prefix %}";
-    var fileNameWithoutFloorAndExtension = "{{ file_name_without_floor_and_extension }}";
+    document.getElementById('filterButton').addEventListener('click', function() {
+        let floorNumber = document.getElementById('floorInput').value;
+        let floorObjects = document.querySelectorAll('div[id^="floor-"]'); // выбираем все div, id которых начинается с "floor-"
 
-    document.querySelectorAll('.floor-button').forEach(function(button) {
-        button.addEventListener('click', function(event) {
-            var imageFile = "объект " + event.target.getAttribute('data-image');
-
-            var imageUrl = staticUrl + "{{ user.username }}/" + imageFile;
-            var imageElement = document.getElementById('floor-image');
-            imageElement.src = imageUrl;
-            imageElement.style.display = 'block';
+        floorObjects.forEach(floorObject => {
+            // если id элемента не равен "floor-объект " + введенный номер этажа, скрываем элемент
+            if (floorObject.id !== "floor-объект " + floorNumber) {
+                floorObject.style.display = 'none';
+            } else {
+                floorObject.style.display = 'block';
+            }
         });
     });
-     document.getElementById('sensor-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        var sensorName = event.target['sensor-name'].value;
-        var sensorType = event.target['sensor-type'].value;
-        var sensorX = event.target['sensor-x'].value;
-        var sensorY = event.target['sensor-y'].value;
+</script>
 
-        var sensorImage = document.createElement('img');
-        sensorImage.src = staticUrl + "sensors/" + sensorType + ".png";
-        sensorImage.style.position = 'absolute';
-        sensorImage.style.left = sensorX + 'px';
-        sensorImage.style.top = sensorY + 'px';
-        sensorImage.alt = sensorName;
+<script>
+  var staticUrl = "{% get_static_prefix %}";
 
-        document.getElementById('floor-image').parentElement.appendChild(sensorImage);
+  var selectedSensorButton = null;
+  var selectedFloorButton = null;
+  var refreshIntervalId = null;
+  var temperatureChartInstance = null;
+  var humidityChartInstance = null;
+  var co2ChartInstance = null;
+
+  var lineState = {
+    temperature: false,
+    co2: false,
+    humidity: false
+  };
+  var graphLink = document.querySelector('.graph-link');
+  var generateChartsIntervalId; // Store the id of the interval here
+
+  // Добавляем обработчик события при клике
+  graphLink.addEventListener('click', function() {
+    // Проверяем, есть ли у элемента класс 'active'
+    if (graphLink.classList.contains('active')) {
+      // Если класс 'active' есть, удаляем его
+      graphLink.classList.remove('active');
+      graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-none.svg' %}') no-repeat";
+      // Делаем #floor-container видимым
+      document.querySelector("#floor-container").style.display = "block";
+      document.querySelector("#statistic").style.display = "none"
+
+      // If the interval has been set, clear it
+      if (generateChartsIntervalId) {
+        clearInterval(generateChartsIntervalId);
+        generateChartsIntervalId = null;
+      }
+
+    } else {
+      // Если класса 'active' нет, добавляем его
+      graphLink.classList.add('active');
+      graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-active.svg' %}') no-repeat";
+      // Скрываем #floor-container
+      document.querySelector("#floor-container").style.display = "none";
+      document.querySelector("#statistic").style.display = "block"
+      generateChartsForSensors();
+
+      // Set up the interval to generate the charts every 60 seconds
+      generateChartsIntervalId = setInterval(generateChartsForSensors, 60000);
+    }
+  });
+
+  document.querySelectorAll('.floor-button').forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      document.querySelector("#floor-container").style.display = "block";
+      document.querySelector("#statistic").style.display = "none"
+      var imageFile = event.target.getAttribute('data-image');
+      var imageUrl = staticUrl + "{{ user.username }}/объект " + imageFile;
+      var imageElement = document.getElementById('floor-image');
+      imageElement.src = imageUrl;
+      imageElement.onload = function() {
+        imageElement.style.display = 'block';
+
+        if (selectedFloorButton) {
+          selectedFloorButton.classList.remove('selected');
+        }
+
+        event.target.classList.add('selected');
+        selectedFloorButton = event.target;
+        var graphLink = document.querySelector('.graph-link');
+        if (graphLink.classList.contains('active')) {
+          graphLink.classList.remove('active');
+          graphLink.querySelector('.graph-icon').style.background = "url('{% static 'graph-none.svg' %}') no-repeat";
+        }
+        fetch(staticUrl + "{{ user.username }}/sensors.json")
+          .then(response => response.json())
+          .then(data => {
+            var sensorsContainer = document.getElementById('sensors-container');
+            sensorsContainer.innerHTML = '';
+
+            var sensors = data["объект " + imageFile];
+            for (var i = 0; i < sensors.length; i++) {
+              let sensor = sensors[i];
+              let sensorButton = document.createElement('button');
+              sensorButton.className = 'sensor-button';
+              sensorButton.style.position = 'absolute';
+              sensorButton.style.marginLeft = sensor['x_coordinate'] + 'px';
+              sensorButton.style.marginTop = sensor['y_coordinate'] + 'px';
+
+              let sensorImage = document.createElement('div');
+              sensorImage.className = 'sensor-image';
+
+              let sensorImgElement = document.createElement('img');
+              sensorImgElement.src = staticUrl + sensor['sensor_type'] + ".png";
+
+              sensorImage.appendChild(sensorImgElement);
+              sensorButton.appendChild(sensorImage);
+
+              fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+                .then(response => response.json())
+                .then(data => {
+                  let isCritical = false;
+                  if (data['temperature'] < 20 || data['temperature'] > 24) {
+                    isCritical = true;
+                  }
+                  if (data['co2'] < 350 || data['co2'] > 700) {
+                    isCritical = true;
+                  }
+                  if (data['humidity'] < 40 || data['humidity'] > 60) {
+                    isCritical = true;
+                  }
+                  if (isCritical) {
+                    let overlayDiv = document.createElement('div');
+                    overlayDiv.style.position = 'absolute';
+                    overlayDiv.style.top = '0';
+                    overlayDiv.style.left = '0';
+                    overlayDiv.style.width = '100%';
+                    overlayDiv.style.height = '100%';
+                    overlayDiv.style.borderRadius='5px';
+                    overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
+                    sensorButton.appendChild(overlayDiv);
+                  }
+                });
+
+              sensorButton.addEventListener('click', (function(sensor) {
+                return function() {
+                    if (selectedSensorButton) {
+                      selectedSensorButton.classList.remove('selected');
+                    }
+                    sensorButton.classList.add('selected');
+                    selectedSensorButton = sensorButton;
+
+                    var updateData = function (){
+                      fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+                        .then(response => response.json())
+                        .then(data => {
+
+                          let tempElement = document.getElementById('temp');
+                          let co2Element = document.getElementById('co2');
+                          let humElement = document.getElementById('hum');
+                          let statsElement = document.getElementById('params-stats');
+
+                          let isCritical = false;
+
+                          if (data['temperature'] >= 20 && data['temperature'] <= 22) {
+                            tempElement.style.color = "#39FF27"; // Зеленый
+                          } else if (data['temperature'] >= 20 && data['temperature'] <= 24) {
+                            tempElement.style.color = "#FFA500"; // Оранжевый
+                          } else {
+                            tempElement.style.color = "#FF564B"; // Красный
+                            isCritical = true;
+                          }
+
+                          if (data['co2'] >= 300 && data['co2'] <= 400) {
+                            co2Element.style.color = "#39FF27"; // Зеленый
+                          } else if (data['co2'] >= 400 && data['co2'] <= 700) {
+                            co2Element.style.color = "#FFA500"; // Оранжевый
+                          } else {
+                            co2Element.style.color = "#FF564B"; // Красный
+                            isCritical = true;
+                          }
+
+                          if (data['humidity'] >= 48 && data['humidity'] <= 52) {
+                            humElement.style.color = "#39FF27"; // Зеленый
+                          } else if (data['humidity'] >= 40 && data['humidity'] <= 60) {
+                            humElement.style.color = "#FFA500"; // Оранжевый
+                          } else {
+                            humElement.style.color = "#FF564B"; // Красный
+                            isCritical = true;
+                          }
+
+                          if (isCritical) {
+                            statsElement.innerText = "Есть критические показатели";
+                            statsElement.style.color = "#FF564B";
+                          } else {
+                            statsElement.innerText = "Показатели в пределах нормы";
+                            statsElement.style.color = "#39FF27";
+                          }
+
+                          if(data['type'] == 'mult'){
+                            document.getElementById('sensor').innerText = "Мультидатчик параметров среды";
+                            document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность, CO2 и температуру";
+                            document.getElementById('sensors_icon_type').src = staticUrl + "mult_icon.png";
+                          } else{
+                            document.getElementById('sensor').innerText = "Датчик влажности";
+                            document.getElementById('sensor-info-type').innerText = "Датчик измеряет влажность";
+                            document.getElementById('sensors_icon_type').src = staticUrl + "def_icon.png";
+                          }
+                          document.getElementById('sensor-name').innerText = "Name: " + data['name'];
+                          document.getElementById('sensor-time').innerText = data['time'];
+                          document.getElementById('sensor-date').innerText = data['date'];
+                          tempElement.innerText = "℃:" +data['temperature'];
+                          co2Element.innerText = "ppm:" +data['co2'];
+                          humElement.innerText = "%" + data['humidity'];
+                          document.getElementById('sensor-type').innerText = "Type: " + data['type'];
+                        });
+                      fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+                        .then(response => response.json())
+                        .then(data => {
+                            let timesall = data.map(item => new Date(item['date'] + ' ' + item['time']));
+                            let temperaturesall = data.map(item => item['temperature']);
+                            let humidityall = data.map(item => item['humidity']);
+                            let co2all = data.map(item => item['co2']);
+
+                            let times = timesall.slice(-20);
+                            let humidity = humidityall.slice(-20);
+                            let temperatures = temperaturesall.slice(-20);
+                            let co2 = co2all.slice(-20);
+                            // document.getElementById('sensor-name').innerText = times + '\n' + temperatures;
+                            let temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+                            let humidityCtx = document.getElementById('humidityChart').getContext('2d');
+                            let co2Ctx = document.getElementById('co2Chart').getContext('2d');
+
+                            // ctx.style.backgroundColor = 'rgba(0, 159, 227, 1)';
+                            if (temperatureChartInstance != null) {
+                              temperatureChartInstance.destroy();
+                            }
+
+                            temperatureChartInstance = new Chart(temperatureCtx, {
+                                type: "line",
+                                data: {
+                                   borderColor: "#009FE3",
+                                   labels: times,
+                                   datasets: [
+                                      {
+                                        label: "Температура",
+                                        backgroundColor: "red",
+                                        borderColor: "#FFA07A",
+                                        data: temperatures,
+                                        tension: 0.4
+                                      },
+                                   ]
+                                },
+                                options:{
+                                  events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'touchend', 'mouseenter', 'mouseleave'],
+                                  maintainAspectRatio: false,
+                                  plugins:{
+                                    legend:{
+                                      labels:{
+                                        font:{
+                                          size:16
+                                        }
+                                      }
+                                    }
+                                  },
+                                  scales:{
+                                    x:{
+                                      display: false,
+                                      ticks: {
+                                        font:{
+                                          size: 40,
+                                        },
+                                      },
+                                      grid:{
+                                        color: 'ccc'
+                                      }
+                                    },
+                                    y:{
+                                      ticks:{
+                                        font: {
+                                          size:16,
+                                        },
+                                        color: '#009FE3'
+                                      }
+                                    }
+                                  },
+                                }
+                              });
+                            if (humidityChartInstance != null) {
+                              humidityChartInstance.destroy();
+                            }
+                            humidityChartInstance = new Chart(humidityCtx, {
+                                type: "line",
+                                data: {
+                                   borderColor: "#009FE3",
+                                   labels: times,
+                                   datasets: [
+                                      {
+                                        label: "Влажность",
+                                        backgroundColor: "blue",
+                                        borderColor: "#009FE3",
+                                        data: humidity,
+                                        tension: 0.4
+                                      },
+                                   ]
+                                },
+                                options:{
+                                  maintainAspectRatio: false,
+                                  plugins:{
+                                    legend:{
+                                      labels:{
+                                        font:{
+                                          size:16
+                                        }
+                                      }
+                                    }
+                                  },
+                                  scales:{
+                                    x:{
+                                      display: false,
+                                      ticks: {
+                                        font:{
+                                          size: 40,
+                                        },
+                                      },
+                                      grid:{
+                                        color: 'ccc'
+                                      }
+                                    },
+                                    y:{
+                                      ticks:{
+                                        font: {
+                                          size:16,
+                                        },
+                                        color: '#009FE3'
+                                      }
+                                    }
+                                  },
+                                }
+                              });
+                            if (co2ChartInstance != null) {
+                              co2ChartInstance.destroy();
+                            }
+                            co2ChartInstance = new Chart(co2Ctx, {
+                                type: "line",
+                                data: {
+                                   borderColor: "#009FE3",
+                                   labels: times,
+                                   datasets: [
+                                      {
+                                        label: "СО2",
+                                        backgroundColor: "green",
+                                        borderColor: "lightgreen",
+                                        data: co2,
+                                        tension: 0.4
+                                      },
+                                   ]
+                                },
+                                options:{
+                                  maintainAspectRatio: false,
+                                  plugins:{
+                                    legend:{
+                                      labels:{
+                                        font:{
+                                          size:16
+                                        }
+                                      }
+                                    }
+                                  },
+                                  scales:{
+                                    x:{
+                                      display: false,
+                                      ticks: {
+                                        font:{
+                                          size: 40,
+                                        },
+                                      },
+                                      grid:{
+                                        color: 'ccc'
+                                      }
+                                    },
+                                    y:{
+                                      ticks:{
+                                        font: {
+                                          size:16,
+                                        },
+                                        color: '#009FE3'
+                                      }
+                                    }
+                                  },
+                                }
+                              });
+                        });
+
+                    }
+                    updateData();
+                    if (refreshIntervalId !== null) {
+                      clearInterval(refreshIntervalId);  // останавливаем обновление предыдущего датчика
+                    }
+                    refreshIntervalId = setInterval(updateData, 60000);
+
+                }
+
+            })(sensor));
+
+              sensorsContainer.appendChild(sensorButton);
+            }
+
+            sensorsContainer.style.display = 'block';
+            sensorsContainer.style.width = imageElement.width + 'px';
+            sensorsContainer.style.height = imageElement.height + 'px';
+        });
+      };
     });
+  });
+  function checkForCriticalValues() {
+    fetch(staticUrl + "{{ user.username }}/sensors.json")
+      .then(response => response.json())
+      .then(data => {
+        // get the floor number from the object
+        let floors = Object.keys(data);
+        floors.forEach(floor => {
+          let floorNum = floor.split(' ')[1].replace('.png', ''); // 'объект 01.png' => 01
+          let sensors = data[floor];
+          sensors.forEach(sensor => {
+            fetch('/get_sensor_data/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+              .then(response => response.json())
+              .then(data => {
+                let criticalParameters = [];
+                if (data['temperature'] === 0 && data['co2'] === 0 && data['humidity'] === 0) {
+                  let errorBlock = document.querySelector('.block-errors');
+                  let errorItem = document.createElement('ul');
+                  let currentTime = new Date();
+                  let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
+                  errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr} неисправен`;
+                  errorBlock.prepend(errorItem);
+                  return;
+                }
+                if (data['temperature'] < 20 || data['temperature'] > 24) {
+                  criticalParameters.push('temperature');
+                }
+                if (data['co2'] < 300 || data['co2'] > 700) {
+                  criticalParameters.push('co2');
+                }
+                if (data['humidity'] < 40 || data['humidity'] > 60) {
+                  criticalParameters.push('humidity');
+                }
+
+                if (criticalParameters.length > 0) {
+                  let errorBlock = document.querySelector('.block-errors');
+                  let errorItem = document.createElement('ul');
+                  let currentTime = new Date();
+                  let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
+                  errorItem.innerText = `${sensor['sensor_name']} на этаже ${floorNum} в ${timeStr} критичные показатели: ${criticalParameters.join(', ')}`;
+                  errorBlock.prepend(errorItem);
+                }
+
+              });
+          });
+        });
+      });
+  }
+  checkForCriticalValues();
+
+
+
+  function generateChartsForSensors() {
+    let floorsContainer = document.querySelector("#statistic");
+
+
+    // Очистка старых графиков
+    floorsContainer.innerHTML = '';
+
+    fetch(staticUrl + "{{ user.username }}/sensors.json")
+      .then(response => response.json())
+      .then(data => {
+        let floors = Object.keys(data);
+
+        floors.forEach(floor => {
+          let floorDiv = document.createElement("div");
+          floorDiv.id = "floor-" + floor.split(".")[0]; // отсекаем ".png"
+          floorsContainer.appendChild(floorDiv);
+
+          let floorTitle = document.createElement("h2");
+          floorTitle.textContent = "Этаж " + floor.split(".")[0]; // отсекаем ".png"
+          floorTitle.style.marginLeft = '20px';
+          floorTitle.style.marginTop = '50px';
+          floorDiv.appendChild(floorTitle);
+
+          let sensors = data[floor];
+
+          sensors.forEach(sensor => {
+            let sensorDiv = document.createElement("div");
+            sensorDiv.id = sensor['sensor_name'];
+            floorDiv.appendChild(sensorDiv);
+
+            let sensorTitle = document.createElement("h3");
+            sensorTitle.textContent = "Датчик " + sensor['sensor_name'];
+            sensorTitle.style.marginLeft = '20px';
+            sensorDiv.appendChild(sensorTitle);
+
+            let graphContainer = document.createElement("div");  // div для всех графов
+            sensorDiv.appendChild(graphContainer);
+
+            let chartsContainer = document.createElement("div");  // новый div для графиков
+            chartsContainer.style.display = "flex";
+            chartsContainer.style.minHeight = '200px';
+            graphContainer.appendChild(chartsContainer);
+
+            let chartsContainerArea = document.createElement("div");  // новый div для графиков
+            chartsContainerArea.style.display = "flex";
+            chartsContainerArea.style.minHeight = '200px';
+            chartsContainerArea.style.marginTop = '20px';
+            graphContainer.appendChild(chartsContainerArea);
+
+            let chartsContainerModern = document.createElement("div");  // новый div для графиков
+            chartsContainerModern.style.display = "flex";
+            chartsContainerModern.style.minHeight = '200px';
+            chartsContainerModern.style.marginTop = '20px';
+            graphContainer.appendChild(chartsContainerModern);
+
+            fetch('/get_sensor_data_history/' + sensor['sensor_name'] + '/' + "{{ user.username }}")
+              .then(response => response.json())
+              .then(data => {
+                let timesall = data.map(item => new Date(item['date'] + ' ' + item['time']));
+                let temperaturesall = data.map(item => item['temperature']);
+                let humidityall = data.map(item => item['humidity']);
+                let co2all = data.map(item => item['co2']);
+
+                let times = timesall.slice(-20);
+                let humidity = humidityall.slice(-20);
+                let temperatures = temperaturesall.slice(-20);
+                let co2 = co2all.slice(-20);
+
+                let temperatureCanvas = document.createElement("canvas");
+                let humidityCanvas = document.createElement("canvas");
+                let co2Canvas = document.createElement("canvas");
+
+
+                let temperatureCanvasArea = document.createElement("canvas");
+                let humidityCanvasArea = document.createElement("canvas");
+                let co2CanvasArea = document.createElement("canvas");
+
+                let temperatureCanvasModern = document.createElement("canvas");
+                let humidityCanvasModern = document.createElement("canvas");
+                let co2CanvasModern = document.createElement("canvas");
+
+
+                chartsContainer.appendChild(temperatureCanvas);
+                chartsContainer.appendChild(humidityCanvas);
+                chartsContainer.appendChild(co2Canvas);
+
+                chartsContainerArea.appendChild(temperatureCanvasArea);
+                chartsContainerArea.appendChild(humidityCanvasArea);
+                chartsContainerArea.appendChild(co2CanvasArea);
+
+                chartsContainerModern.appendChild(temperatureCanvasModern);
+                chartsContainerModern.appendChild(humidityCanvasModern);
+                chartsContainerModern.appendChild(co2CanvasModern);
+
+                let temperatureChartInstance = new Chart(temperatureCanvas.getContext('2d'), {
+                  type: "line",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "Температура",
+                        backgroundColor: "red",
+                        borderColor: "#FFA07A",
+                        tension: 0.4,
+                        data: temperatures,
+
+                      },
+                    ]
+                  },
+                  options:{
+                    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'touchend', 'mouseenter', 'mouseleave'],
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          // font:{
+                          //   size:16
+                          // }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        // ticks:{
+                        //   font: {
+                        //     size:16,
+                        //   },
+                        //   color: '#009FE3'
+                        // }
+                      }
+                    },
+                  }
+                });
+
+                let humidityChartInstance = new Chart(humidityCanvas.getContext('2d'), {
+                  type: "line",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "Влажность",
+                        backgroundColor: "blue",
+                        borderColor: "#009FE3",
+                        data: humidity,
+                        tension: 0.4
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          // font:{
+                          //   size:16
+                          // }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      y:{
+                        // ticks:{
+                        //   font: {
+                        //     size:16,
+                        //   },
+                        //   color: '#009FE3'
+                        // }
+                      }
+                    },
+                  }
+                });
+
+                let co2ChartInstance = new Chart(co2Canvas.getContext('2d'), {
+                  type: "line",
+                  data: {
+                    labels: times,
+                    datasets: [
+                      {
+                        label: "СО2",
+                        backgroundColor: "green",
+                        borderColor: "lightgreen",
+                        tension: 0.4,
+                        data: co2,
+
+                      },
+                    ]
+                  },
+                  options:{
+                    maintainAspectRatio: false,
+                    plugins:{
+                      legend:{
+                        labels:{
+                          // font:{
+                          //   size:16
+                          // }
+                        }
+                      }
+                    },
+                    scales:{
+                      x:{
+                        display: false,
+                        ticks: {
+                          font:{
+                            size: 40,
+                          },
+                        },
+                        grid:{
+                          color: 'ccc'
+                        }
+                      },
+                      // y:{
+                      //   ticks:{
+                      //     font: {
+                      //       size:16,
+                      //     },
+                      //     color: '#009FE3'
+                      //   }
+                      // }
+                    },
+                  }
+                });
+
+                let uniqueDays = [...new Set(data.map(item => item['date']))].slice(-7);
+
+                // Для каждого дня вычислим среднее значение каждого из параметров
+                let averageTemperatures = [];
+                let averageHumidity = [];
+                let averageCo2 = [];
+
+                for (let day of uniqueDays) {
+                    let dayData = data.filter(item => item['date'] === day);
+
+                    let totalTemperature = 0;
+                    let totalHumidity = 0;
+                    let totalCo2 = 0;
+
+                    for (let item of dayData) {
+                        totalTemperature += item['temperature'];
+                        totalHumidity += item['humidity'];
+                        totalCo2 += item['co2'];
+                    }
+
+                    averageTemperatures.push(totalTemperature / dayData.length);
+                    averageHumidity.push(totalHumidity / dayData.length);
+                    averageCo2.push(totalCo2 / dayData.length);
+                }
+
+                let temperatureChartInstanceArea = new Chart(temperatureCanvasArea.getContext('2d'), {
+                      type: 'line',
+                      data: {
+                          labels: uniqueDays,
+                          datasets: [{
+                              label: 'Средняя температура 7 дней',
+                              data: averageTemperatures,
+                              backgroundColor: "red",
+                              borderColor: "#FFA07A",
+                              tension: 0.4,
+                              fill: false,
+
+                          }]
+                      }
+                });
+
+                let humidityChartInstanceArea = new Chart(humidityCanvasArea.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: uniqueDays,
+                        datasets: [{
+                            label: 'Средняя влажность 7 дней',
+                            data: averageHumidity,
+                            fill: false,
+                            backgroundColor: "blue",
+                            borderColor: "#009FE3",
+                            tension: 0.4
+                        }]
+                    }
+                });
+
+                let co2ChartInstanceArea = new Chart(co2CanvasArea.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: uniqueDays,
+                      datasets: [{
+                          label: 'Средний уровень CO2 7 дней',
+                          data: averageCo2,
+                          backgroundColor: "green",
+                          borderColor: "lightgreen",
+                          tension: 0.4,
+                          fill: false
+                      }]
+                  }
+
+                });
+                let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+                let dataByMonth = data.reduce((acc, item) => {
+                    let date = new Date(item['date']);
+                    let month = monthNames[date.getMonth()];
+                    let year = date.getFullYear();
+
+                    let monthYear = `${month} ${year}`;
+
+                    if (!acc[monthYear]) {
+                        acc[monthYear] = {
+                            temperature: [],
+                            humidity: [],
+                            co2: [],
+                        };
+                    }
+
+                    acc[monthYear].temperature.push(item['temperature']);
+                    acc[monthYear].humidity.push(item['humidity']);
+                    acc[monthYear].co2.push(item['co2']);
+
+                    return acc;
+                }, {});
+
+                let months = Object.keys(dataByMonth);
+                let averageTemperaturesByMonth = months.map(month => average(dataByMonth[month].temperature));
+                let averageHumidityByMonth = months.map(month => average(dataByMonth[month].humidity));
+                let averageCo2ByMonth = months.map(month => average(dataByMonth[month].co2));
+
+
+                let temperatureChartInstanceModern = new Chart(temperatureCanvasModern.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Средняя температура',
+                                data: averageTemperaturesByMonth,
+                                backgroundColor: '#FFA07A',
+                            },
+                            {
+                                label: 'Средняя влажность',
+                                data: averageHumidityByMonth,
+                                backgroundColor: '#009FE3',
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Средние показатели по месяцам'
+                            }
+                        }
+                    },
+                });
+                function average(arr) {
+                    return arr.reduce((a, b) => a + b, 0) / arr.length;
+                }
+
+
+                let humidityChartInstanceModern = new Chart(humidityCanvasModern.getContext('2d'), {
+                  type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Средний уровень CO2',
+                                data: averageCo2ByMonth,
+                                backgroundColor: 'lightgreen',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Средние показатели по месяцам'
+                            }
+                        }
+                    },
+                });
+                let co2ChartInstanceModern = new Chart(co2CanvasModern.getContext('2d'), {
+                  type: 'line',
+                  data: {
+                      labels: uniqueDays,
+                      datasets: [{
+                          label: 'Изменение температуры',
+                          data: averageTemperatures,
+                          backgroundColor: "red",
+                          borderColor: "#FFA07A",
+                          tension: 0.4,
+                          fill: false,
+                      }, {
+                          label: 'Изменение влажности',
+                          data: averageHumidity,
+                          backgroundColor: "blue",
+                          borderColor: "#009FE3",
+                          tension: 0.4,
+                          fill: false
+                      }, {
+                          label: 'Изменение уровня CO2',
+                          data: averageCo2,
+                          backgroundColor: "green",
+                          borderColor: "lightgreen",
+                          tension: 0.4,
+                          fill: false
+                      }]
+                  }
+                });
+              });
+          });
+        });
+      });
+  }
+
+
+  // Запустить checkForCriticalValues каждую минуту
+  setInterval(checkForCriticalValues, 60000);
+  function clearErrors() {
+    let errorBlock = document.querySelector('.block-errors');
+    while (errorBlock.firstChild) {
+      errorBlock.removeChild(errorBlock.firstChild);
+    }
+  }
+
+  // Очистить блок с ошибками каждые 20 минут
+  setInterval(clearErrors, 1200000);
+
+  function checkSensors() {
+      document.querySelectorAll('.sensor-button').forEach(function(sensorButton) {
+          let sensorName = sensorButton.getAttribute('data-sensor-name');
+          fetch('/get_sensor_data/' + sensorName + '/' + "{{ user.username }}")
+              .then(response => response.json())
+              .then(data => {
+                  let isCritical = false;
+                  if (data['temperature'] < 20 || data['temperature'] > 24) {
+                      isCritical = true;
+                  }
+                  if (data['co2'] < 350 || data['co2'] > 700) {
+                      isCritical = true;
+                  }
+                  if (data['humidity'] < 40 || data['humidity'] > 60) {
+                      isCritical = true;
+                  }
+                  let overlayDiv = sensorButton.querySelector('div');
+                  if (isCritical) {
+                      if (!overlayDiv) {
+                          overlayDiv = document.createElement('div');
+                          overlayDiv.style.position = 'absolute';
+                          overlayDiv.style.top = '0';
+                          overlayDiv.style.left = '0';
+                          overlayDiv.style.width = '100%';
+                          overlayDiv.style.height = '100%';
+                          overlayDiv.style.borderRadius='5px';
+                          overlayDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';  // полупрозрачный красный фон
+                          sensorButton.appendChild(overlayDiv);
+                      }
+                  } else {
+                      if (overlayDiv) {
+                          sensorButton.removeChild(overlayDiv);
+                      }
+                  }
+              });
+      });
+  }
+
+  // Запускаем функцию checkSensors каждую минуту
+  setInterval(checkSensors, 60000);
+
+
 </script>
 {% endblock %}
+
+
+
+
+
+
 

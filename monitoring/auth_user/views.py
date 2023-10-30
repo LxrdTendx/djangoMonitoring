@@ -13,17 +13,17 @@ import psycopg2
 
 
 @login_required
-def get_sensor_data(request, sensor_name):
+def get_sensor_data(request, sensor_name, username):
     conn = psycopg2.connect(
-        user='postgres',
-        password='qwerty2237563822375638qwerty11',
-        host='db.zippxfsbfondjxkayboi.supabase.co',
-        port='6543',
+        user='test',
+        password='sownh12345',
+        host='45.12.74.4',
+        port='5432',
         database='postgres'
     )
-
+    table_name = username
     cur = conn.cursor()
-    cur.execute("SELECT * FROM sensors_tabel WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 1", (sensor_name,))
+    cur.execute(f"SELECT * FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 1", (sensor_name,))
     result = cur.fetchone()
 
     if result:
@@ -50,50 +50,45 @@ def get_sensor_data(request, sensor_name):
             'time': None,
         }
 
+
     return JsonResponse(sensor_data)
 
-@login_required
-def get_sensor_data_history(request, sensor_name):
+
+def get_sensor_data_history(request, sensor_name, username):
+    """
+    Get the last 100 sensor data for a specific sensor.
+    """
+    table_name = username
     conn = psycopg2.connect(
-        user='postgres',
-        password='qwerty2237563822375638qwerty11',
-        host='db.zippxfsbfondjxkayboi.supabase.co',
-        port='6543',
+        user='test',
+        password='sownh12345',
+        host='45.12.74.4',
+        port='5432',
         database='postgres'
     )
 
     cur = conn.cursor()
-    cur.execute("SELECT * FROM sensors_tabel WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 100", (sensor_name,))
-    result = cur.fetchall()
+    cur.execute(f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC", (sensor_name,))
+    rows = cur.fetchall()
 
-    sensor_data_history = []
-    if result:
-        for row in result:
-            sensor_data = {
-                'id': row[0],
-                'name': row[1],
-                'type': row[2],
-                'temperature': row[3],
-                'co2': row[4],
-                'humidity': row[5],
-                'time': row[6],
-                'date': row[7],
-            }
-            sensor_data_history.append(sensor_data)
-    else:
-        sensor_data = {
-            'id': None,
-            'name': None,
-            'type': None,
-            'temperature': None,
-            'co2': None,
-            'humidity': None,
-            'date': None,
-            'time': None,
-        }
-        sensor_data_history.append(sensor_data)
+    data = []
+    for row in rows:
+        data.append({
+            'id': row[0],
+            'name': row[1],
+            'type': row[2],
+            'temperature': row[3],
+            'co2': row[4],
+            'humidity': row[5],
+            'time': row[6],
+            'date': row[7],
 
-    return JsonResponse(sensor_data_history, safe=False)
+        })
+
+    conn.close()
+    data.reverse()
+
+    return JsonResponse(data, safe=False)
 
 def login_view(request):
     if request.method == 'POST':

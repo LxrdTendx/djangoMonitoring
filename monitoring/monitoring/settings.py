@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bx7#=i(m@-aa002#%%7f)0xetsvh4sbm6gg=8v7)g^-1t=fd%5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['45.12.74.4', 'localhost', '127.0.0.1']
 
 AUTH_USER_MODEL = 'auth_user.User'
 
@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'auth_user',
-    'googlecharts',
 ]
 
 MIDDLEWARE = [
