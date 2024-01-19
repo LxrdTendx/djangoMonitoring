@@ -1,0 +1,9 @@
+{% load static %}
+
+{% if widget.is_initial %}
+    <div>
+        <img src="{{ widget.value.url }}" style="max-height:200px; max-width:200px;" alt="Предпросмотр">
+    </div>
+{% endif %}
+{{ widget.input }}
+{% if widget.is_initial %}{{ widget.clear_checkbox }}{% endif %}

@@ -10,7 +10,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import json
 import psycopg2
-
+from .models import Floor, Sensor
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def get_sensor_data(request, sensor_name, username):
@@ -109,23 +110,29 @@ def login_view(request):
 @login_required
 def profile(request):
     username = request.user.username
-    user_dir = os.path.join('auth_user/templates', username)
 
-    if os.path.isdir(user_dir):
-        image_files = [f for f in os.listdir(user_dir) if f.endswith('.png')]
-        floor_numbers = [re.search(r'(\d+)\.png$', f).group(1) for f in image_files]
-
-    else:
-        image_files = []
-        floor_numbers = []
+    # Получите изображения и номера этажей из базы данных
+    floors = Floor.objects.filter(users=request.user).order_by('floor_number')
+    floor_numbers = [floor.floor_number for floor in floors]
+    sensors = Sensor.objects.filter(floor__in=floors)
 
     return render(request, 'profile.html', {
         'user': request.user,
-        'image_files': image_files,
+        'floors': floors,
         'floor_numbers': floor_numbers,
+        'sensors': sensors,
     })
 
-@login_required
+def get_floors_and_sensors(request):
+    floors = Floor.objects.filter(users=request.user).prefetch_related('sensors')
+    response_data = {}
+
+    for floor in floors:
+        sensors_data = [{"name": sensor.name, "type": sensor.sensor_type} for sensor in floor.sensors.all()]
+        response_data[f"Этаж {floor.floor_number}"] = sensors_data
+
+    return JsonResponse(response_data)
+
 @login_required
 def profile_view(request):
     user_images_dir = os.path.join(settings.STATIC_ROOT, request.user.username)
@@ -150,6 +157,7 @@ def profile_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')  # Перенаправление на страницу входа после выхода
+
 
 
 
