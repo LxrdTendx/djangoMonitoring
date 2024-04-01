@@ -11,4 +11,6 @@ urlpatterns = [
     path('get_sensor_data/<str:sensor_name>/<str:username>', views.get_sensor_data, name='get_sensor_data'),
     path('get_sensor_data_history/<str:sensor_name>/<str:username>', views.get_sensor_data_history, name='get_sensor_data_history'),
     path('get_floors_and_sensors/', views.get_floors_and_sensors, name='get_floors_and_sensors'),
+    path('monitoring/', views.monitoring_view, name='monitoring'),
+    path('download_data/', views.download_data, name='download_data'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

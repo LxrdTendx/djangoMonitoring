@@ -177,7 +177,7 @@
       background: #383639;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       border-radius: 20px;
-      margin-left: 23px;
+
     }
     .block-sensor-info {
       width: 650px;
@@ -189,6 +189,7 @@
 
     }
     #floor-container {
+        margin-left: 23px;
       transition: 1s;
       position: relative;
       flex-wrap: nowrap; /* This allows the content to wrap if it exceeds the container's width */
@@ -329,8 +330,7 @@
       /*padding: 10px;*/
     }
     canvas{
-      max-height: 200px !important;
-      max-width: 400px !important;
+
       margin: 0;
       padding: 0;
       font-size: 40px;
@@ -338,7 +338,6 @@
       background-color: #383639;
       color: white;
       display: none;
-      margin-left: 23px;
       border-radius: 5px;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
@@ -347,8 +346,9 @@
       filter: brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(7) contrast(0.88);
     }
     .charts-block{
+        justify-content: space-between;
       display: flex;
-      width: 1308px;
+      width: auto;
     }
     h3, h2{
       font-family: 'Inter',sans-serif;
@@ -422,6 +422,11 @@
     .critical-sensor {
         filter: brightness(50%) sepia(1) hue-rotate(-50deg) saturate(5);
     }
+    @media (min-width: 1920px) {
+        body {
+            zoom: 100%;
+        }
+      }
 
 
 
@@ -432,20 +437,16 @@
 
   <div class="content-wrapper">
     <div class="side-section">
-      <a href="http://ecotracker.tech/profile">
+      <a href="{% url 'profile' %}">
         <img class="logo" src="{% static 'logo.png' %}" alt="Logo" >
       </a>
       <hr class="separator">
-      <a class="graph-link" href="#">
+      <a class="graph-link" href="{% url 'monitoring' %}">
         <div class="graph-icon"></div>
       </a>
       <a id="show-all-floors" href="#">
           <div class="floor-icon"></div>
       </a>
-
-
-
-
 
 
       <div class="floor-buttons">
@@ -492,17 +493,23 @@
           <img id="floor-image" src="" alt="Floor image" style="top: 0; left: 0; display: none;">
           <div id="sensors-container" style="position: absolute; margin-top:285px; top: 0; left: 0; display: none; "></div>
         </div>
-          <p id="sensor-name"></p>
-          <div class="charts-block" style="zoom:133%">
-            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
-                <canvas id="temperatureChart"></canvas>
+
+          <p id="sensor-name" style="display: none"></p>
+
+          <div class="charts-block" style="">
+            <div class="chart-container" style="height: 300px;width: 580px">
+                <canvas id="humidityChart" style="width: auto;height: auto"></canvas>
             </div>
-            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
-                <canvas id="humidityChart"></canvas>
+
+            <div class="chart-container" style="height: 300px;width: 580px">
+                <canvas id="co2Chart" style="width: auto;height: auto"></canvas>
             </div>
-            <div class="chart-container" style="position: relative; height:30vh; width:40vw">
-                <canvas id="co2Chart"></canvas>
+
+            <div class="chart-container" style="height: 300px; width: 580px">
+                <canvas id="temperatureChart" style="width: auto;height: auto"></canvas>
             </div>
+
+
           </div>
 
 
@@ -533,14 +540,86 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+
+
+<script>
+let temperatureChart;
+let co2Chart;
+let humidityChart;
+let activeSensorName = null;
+function updateOrCreateChart(chartInstance, chartId, label, data) {
+    if (chartInstance) {
+        chartInstance.destroy(); // Уничтожаем предыдущий график
+    }
+    return createChart(chartId, label, data); // Создаем новый график
+}
+function createChart(chartId, label, data) {
+    var ctx = document.getElementById(chartId).getContext('2d');
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.time),
+            datasets: [{
+                label: label,
+                data: data.map(d => d.value),
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+function updateSensorData(sensorName) {
+    fetch('/get_sensor_data_history/' + sensorName + '/' + "{{ user.username }}")
+    .then(response => response.json())
+    .then(data => {
+        // Предполагаем, что тип датчика приходит вместе с данными
+        const sensorType = data.length > 0 ? data[0].type : null;
+        if (sensorType === 'mult') {
+            let temperatureData = data.map(item => ({ time: item.time, value: item.temperature }));
+            let co2Data = data.map(item => ({ time: item.time, value: item.co2 }));
+            let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
+
+            // Обновляем или создаем графики для всех параметров
+            temperatureChart = updateOrCreateChart(temperatureChart, 'temperatureChart', 'Temperature', temperatureData);
+            co2Chart = updateOrCreateChart(co2Chart, 'co2Chart', 'CO2', co2Data);
+            humidityChart = updateOrCreateChart(humidityChart, 'humidityChart', 'Humidity', humidityData);
+        } else if (sensorType === 'wet') {
+            let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
+
+            // Создаем или обновляем только график влажности
+            humidityChart = updateOrCreateChart(humidityChart, 'humidityChart', 'Humidity', humidityData);
+
+            // Уничтожаем ненужные графики, если они существуют
+            if (temperatureChart) temperatureChart.destroy();
+            if (co2Chart) co2Chart.destroy();
+        }
+    });
+}
+</script>
+
 <script>
 function isSensorCritical(sensorData) {
-    // Тут должна быть логика определения критического состояния датчика
-    // Например, проверка температуры, CO2 и влажности
-    if (sensorData['temperature'] < 20 || sensorData['temperature'] > 24 ||
-        sensorData['co2'] < 300 || sensorData['co2'] > 700 ||
-        sensorData['humidity'] < 40 || sensorData['humidity'] > 60) {
-        return true;
+    // Проверяем тип датчика и определяем критичность в зависимости от типа
+    if (sensorData['type'] === 'mult') {
+        // Датчик типа mult - проверяем температуру, CO2 и влажность
+        if (sensorData['temperature'] < 20 || sensorData['temperature'] > 24 ||
+            sensorData['co2'] < 300 || sensorData['co2'] > 700 ||
+            sensorData['humidity'] < 40 || sensorData['humidity'] > 60) {
+            return true;
+        }
+    } else if (sensorData['type'] === 'wet') {
+        // Датчик типа wet - проверяем только влажность
+        if (sensorData['humidity'] < 40 || sensorData['humidity'] > 60) {
+            return true;
+        }
     }
     return false;
 }
@@ -601,6 +680,8 @@ document.addEventListener('DOMContentLoaded', function() {
                           }
                     });
                     sensorBtn.addEventListener('click', function() {
+                        activeSensorName = sensorName; // сохраняем имя активного датчика
+                        updateSensorData(sensorName);
                         if (selectedSensorButton) {
                             selectedSensorButton.classList.remove('selected');
                         }
@@ -687,7 +768,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             document.getElementById('sensor-name').innerText = "Name: " + data['name'];
                             document.getElementById('sensor-time').innerText = data['time'];
                             document.getElementById('sensor-date').innerText = data['date'];
-                            document.getElementById('sensor-type').innerText = "Type: " + data['type'];
+                            // document.getElementById('sensor-type').innerText = "Type: " + data['type'];
                           });
                     });
 
@@ -699,6 +780,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+setInterval(() => {
+    if (activeSensorName) {
+        updateSensorData(activeSensorName);
+    }
+}, 60000);
 
 </script>
 <script>

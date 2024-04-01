@@ -1,0 +1,652 @@
+{% load static %}
+
+{% block content %}
+  <head>
+    <title>Welcome, {{ user.username }}!</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+  </head>
+  <style>
+    .side-section {
+      min-width: 134px;
+      max-width: 134px;
+      min-height: 750px;
+      max-height: 750px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 0px 0px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+
+
+    .logo {
+      margin-top: 29px;
+    }
+
+    .separator {
+      width: 102px;
+      height: 0;
+      border: 1px solid #1F1F20;
+      margin-top: 25px;
+    }
+
+
+    .floor-button {
+      width: 60px;
+      height: 60px;
+      background: #1F1F20;
+      color: #383639;
+      border: none;
+      box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 30px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 29px;
+      flex-shrink: 0;
+    }
+
+    .floor-button:hover {
+      background: #FFFFFF;
+      color: #1F1F20;
+      transition: 1s;
+      box-shadow: none;
+    }
+
+    .floor-button:focus {
+      background: #FFFFFF;
+      color: #1F1F20;
+      box-shadow: none;
+    }
+
+    .floor-button.selected {
+      background: #FFFFFF;
+      color: #1F1F20;
+    }
+
+    .floor-buttons::-webkit-scrollbar {
+      display: none; /* for Chrome, Safari, Opera */
+    }
+
+    .floor-buttons {
+      -ms-overflow-style: none;  /* for IE and Edge */
+      scrollbar-width: none;  /* for Firefox */
+      height: 600px;
+      overflow-y: scroll;  /* changed from 'hidden' to 'scroll' */
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    body{
+      zoom: 75%;
+      background-color: #1F1F20;
+      margin: 0;
+    }
+
+    .content-wrapper {
+      display: flex;
+      position: relative;
+    }
+
+    .logout-link {
+      margin-bottom: 24px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      color: #FFFFFF;
+
+      bottom:0;
+    }
+
+    .logout-icon {
+        width: 41px; /* Установите размер изображения */
+        height: 37px;
+        background: url("{% static 'Logout.svg' %}") no-repeat;
+    }
+
+    .logout-link:hover .logout-icon {
+        transition: 0.5s;
+        background: url("{% static 'Logout-hover.svg' %}") no-repeat;
+    }
+    .download-link{
+        cursor: pointer;
+      margin-bottom: 20px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      color: #FFFFFF;
+      bottom:0;
+
+    }
+    .download-link svg, g path{
+        fill: #1F1F20;
+    }
+    .download-link:hover svg{
+        fill: #009FE3;
+    }
+    .download-link:hover svg g path{
+        transition: 0.5s;
+        fill: #009FE3;
+    }
+
+    .graph-link {
+      margin-bottom: 20px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 24px;
+      line-height: 29px;
+      color: #FFFFFF;
+      bottom:0;
+    }
+
+    .graph-icon {
+        width: 61px; /* Установите размер изображения */
+        height: 61px;
+        background: url("{% static 'graph-none.svg' %}") no-repeat;
+    }
+
+    .graph-link:hover .graph-icon {
+        transition: 0.5s;
+        background: url("{% static 'graph-active.svg' %}") no-repeat;
+    }
+
+    .graph-link.active .graph-icon{
+      transition: 0.5s;
+      background: url("{% static 'graph-active.svg' %}") no-repeat;
+    }
+
+    .sensor-button {
+      background: none;
+      border: none;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+    }
+
+    .sensor-button img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .sensor-button.selected {
+      box-shadow: 0 0 0 4px #009FE3;
+      transition: 0.1s;
+      border-radius: 5px;
+    }
+
+    #sensor-name{
+      margin-left: 23px;
+      color: white;
+    }
+
+    .block-date-time {
+      width: 650px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+    }
+    .block-sensor-info {
+      width: 650px;
+      height: 250px;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+
+    }
+    #floor-container {
+        width: 1800px;
+        margin-left: 23px;
+      transition: 1s;
+      position: relative;
+      flex-wrap: nowrap; /* This allows the content to wrap if it exceeds the container's width */
+    }
+    #sensor{
+      margin-bottom: 0px;
+      margin-top: 29px;
+      width: 431px;
+      height: 83px;
+      flex-direction: column;
+      flex-shrink: 0;
+      color: var(--main-white, #FFF);
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    #sensor-info-type{
+      width: 378px;
+      margin-top: 19px;
+      color: var(--main-violet, #9960D2);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    #sensor-date{
+      margin-top: 28px;
+      margin-bottom: 0px;
+      width: 120px;
+      color: var(--main-white, #FFF);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    #sensor-time{
+      margin-top: 28px;
+      margin-bottom: 0px;
+      margin-left: 80px;
+      width: 130px;
+      color: var(--main-white, #FFF);
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    .date_time-block{
+      display: flex;
+    }
+    .info-sensors{
+      margin-left: 34px;
+      margin-top: 29px;
+      margin-bottom: 0px;
+      width: 499px;
+      height: 52px;
+      flex-direction: column;
+      flex-shrink: 0;
+      color: var(--main-white, #FFF);
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    .params{
+      display: flex;
+      width: 650px;
+      margin-top: 31px;
+    }
+    #hum{
+      margin-left: 34px;
+    }
+    #hum, #co2, #temp{
+      width: 180px;
+      margin-top: 0px;
+      margin-bottom: 0px;
+      color: var(--main-white, #FFF);
+      margin-right: 130px;
+      font-size: 36px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+    #params-stats{
+      margin-left: 34px;
+      margin-top: 40px;
+      font-size: 18px;
+      font-family: 'Inter',sans-serif;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+    }
+    .block-date-time{
+      display: flex;
+    }
+    .sensors_icon_type{
+      margin-top: 42px;
+      margin-left: 38px;
+      margin-right: 27px;
+      height: 140px;
+      width: 140px;
+    }
+    .main-sector{
+      margin-top: 32px;
+    }
+    .block-errors {
+      font-family: 'Inter',sans-serif;
+      background: #383639;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 20px;
+      margin-left: 23px;
+      height: 250px;
+      width: 371px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      color:red;
+      font-size: 20px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .block-errors::-webkit-scrollbar{
+      width: 0;
+      height: 0;
+    }
+    ul{
+      padding-left: 15px;
+    }
+    .error-message {
+      border: 1px solid red;
+      margin: 5px;
+      /*padding: 10px;*/
+    }
+    canvas{
+        max-height: 300px;
+        max-width: 580px;
+      margin: 0;
+      padding: 0;
+      font-size: 40px;
+      /*margin-left: -400px;*/
+      background-color: #383639;
+      color: white;
+      display: none;
+      border-radius: 5px;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+    }
+    .critical {
+      filter: brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(7) contrast(0.88);
+    }
+    .charts-block{
+        justify-content: space-between;
+      display: flex;
+      width: auto;
+    }
+    h3, h2{
+      font-family: 'Inter',sans-serif;
+      color: #009FE3;
+    }
+
+    .thumbnail {
+      width: 100px;
+      height: auto;
+      margin: 5px;
+    }
+
+    #thumbnails-container {
+      margin-top: 20px;
+      margin-left: 20px;
+      background: #1F1F20;
+      border: #1F1F20;
+    }
+
+    #thumbnails-container img{
+      margin-right: 5px;
+      margin-bottom: 5px;
+      height: 300px;
+      width: 500px;
+      background-color: #1F1F20;
+    }
+    .thumbnail-button{
+      background: #1F1F20;
+      border: #1F1F20;
+    }
+
+    #thumbnails-container img:hover {
+      border-radius: 3px;
+      box-shadow: 0 0 5px 5px #009FE3;
+      cursor: pointer;
+      transition: 0.6s;
+
+    }
+
+        /* Общий стиль */
+    #show-all-floors {
+        margin-bottom: 20px;
+        text-decoration: none;
+        font-family: 'Inter', sans-serif;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 24px;
+        line-height: 29px;
+        color: #FFFFFF;
+        bottom: 0;
+    }
+
+    /* Стиль для иконки */
+    .floor-icon {
+        width: 61px; /* Установите размер изображения */
+        height: 61px;
+        background: url("{% static 'mock-up.svg' %}") no-repeat;
+    }
+
+    /* Эффект при наведении */
+    #show-all-floors:hover .floor-icon {
+        transition: 0.5s;
+        background: url("{% static 'mock-ups.svg' %}") no-repeat;
+    }
+
+    /* Эффект для активной кнопки */
+    #show-all-floors.active .floor-icon {
+        transition: 0.5s;
+        background: url("{% static 'mock-ups.svg' %}") no-repeat;
+    }
+    .critical-sensor {
+        filter: brightness(50%) sepia(1) hue-rotate(-50deg) saturate(5);
+    }
+    @media (min-width: 1920px) {
+        body {
+            zoom: 100%;
+        }
+      }
+
+
+
+
+
+
+</style>
+
+
+<div class="content-wrapper">
+    <div class="side-section">
+        <a href="{% url 'profile' %}">
+            <img class="logo" src="{% static 'logo.png' %}" alt="Logo" >
+        </a>
+        <hr class="separator">
+        <a class="graph-link active" href="{% url 'profile' %}">
+            <div class="graph-icon"></div>
+        </a>
+        <a class="download-link" onclick="openDownloadModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+                <g>
+                    <path d="M382.56 233.376A15.96 15.96 0 0 0 368 224h-64V16c0-8.832-7.168-16-16-16h-64c-8.832 0-16 7.168-16 16v208h-64a16.013 16.013 0 0 0-14.56 9.376c-2.624 5.728-1.6 12.416 2.528 17.152l112 128A15.946 15.946 0 0 0 256 384c4.608 0 8.992-2.016 12.032-5.472l112-128c4.16-4.704 5.12-11.424 2.528-17.152z"  opacity="1"></path>
+                    <path d="M432 352v96H80v-96H16v128c0 17.696 14.336 32 32 32h416c17.696 0 32-14.304 32-32V352h-64z" opacity="1"></path>
+                </g>
+            </svg>
+        </a>
+
+        <div class="floor-buttons"></div>
+
+        <a class="logout-link" href="{% url 'logout' %}" >
+            <div class="logout-icon"></div>
+        </a>
+
+    </div>
+    <div>
+        <div id="floor-container" >
+            <div id="downloadModal" style="display:none;">
+                <h3>Выберите формат файла:</h3>
+                <select id="fileFormat">
+                    <option value="xlsx">Excel (.xlsx)</option>
+                    <option value="csv">CSV (.csv)</option>
+                </select>
+                <h3>Выберите период:</h3>
+                <select id="dateRange">
+                    <option value="day">День</option>
+                    <option value="month">Месяц</option>
+                    <option value="year">Год</option>
+                </select>
+                <button onclick="downloadData()">Скачать</button>
+            </div>
+
+
+            {% for floor in floors %}
+            <h2>Этаж {{ floor.floor_number }}</h2>
+            {% for sensor in floor.sensors.all %}
+                <h3>Датчик {{ sensor.name }} {{sensor.sensor_type}}</h3>
+                <div style="display: flex; width: auto; height: 300px; justify-content: space-between">
+
+                    {% if sensor.sensor_type == 'mult' %}
+                        <canvas style="height: 300px;width: 580px" id="temperature-chart-{{ floor.floor_number }}-{{ sensor.name }}" ></canvas>
+                        <canvas style="height: 300px;width: 580px" id="co2-chart-{{ floor.floor_number }}-{{ sensor.name }}"></canvas>
+                        <canvas style="height: 300px;width: 580px" id="humidity-chart-{{ floor.floor_number }}-{{ sensor.name }}"></canvas>
+                    {% elif sensor.sensor_type == 'wet' %}
+                        <canvas style="height: 300px;width: 580px" id="humidity-chart-{{ floor.floor_number }}-{{ sensor.name }}"></canvas>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+
+
+<script>
+function openDownloadModal() {
+    // Функция для отображения модального окна
+    document.getElementById('downloadModal').style.display = 'block';
+}
+
+function downloadData() {
+    // Функция для отправки запроса на скачивание
+    const fileFormat = document.getElementById('fileFormat').value;
+    const dateRange = document.getElementById('dateRange').value;
+
+    window.location.href = `/download_data?format=${fileFormat}&range=${dateRange}`;
+    document.getElementById('downloadModal').style.display = 'none';
+}
+</script>
+
+<script>
+window.charts = {};
+function updateOrCreateChart(chartInstance, chartId, label, data) {
+    if (chartInstance) {
+        chartInstance.destroy(); // Уничтожаем предыдущий график
+    }
+    return createChart(chartId, label, data); // Создаем новый график
+}
+function createChart(chartId, label, data) {
+    var ctx = document.getElementById(chartId).getContext('2d');
+    window.charts[chartId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.time),
+            datasets: [{
+                label: label,
+                data: data.map(d => d.value),
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    return window.charts[chartId];
+}
+async function fetchSensorDataAndRenderCharts(sensorName, floorNumber, sensorType) {
+    try {
+        const response = await fetch(`/get_sensor_data_history/${sensorName}/{{ request.user.username }}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+
+        let tempChartId = `temperature-chart-${floorNumber}-${sensorName}`;
+        let co2ChartId = `co2-chart-${floorNumber}-${sensorName}`;
+        let humidityChartId = `humidity-chart-${floorNumber}-${sensorName}`;
+
+        if (window.charts[tempChartId]) {
+            window.charts[tempChartId].destroy();
+        }
+        if (window.charts[co2ChartId]) {
+            window.charts[co2ChartId].destroy();
+        }
+        if (window.charts[humidityChartId]) {
+            window.charts[humidityChartId].destroy();
+        }
+
+        if (sensorType === 'mult') {
+            // Process the data for a 'mult' sensor
+            let temperatureData = data.map(item => ({ time: item.time, value: item.temperature }));
+            let co2Data = data.map(item => ({ time: item.time, value: item.co2 }));
+            let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
+
+            // Ensure your chart creation logic is correct
+            createChart(`temperature-chart-${floorNumber}-${sensorName}`, 'Temperature', temperatureData);
+            createChart(`co2-chart-${floorNumber}-${sensorName}`, 'CO2', co2Data);
+            createChart(`humidity-chart-${floorNumber}-${sensorName}`, 'Humidity', humidityData);
+        } else if (sensorType === 'wet') {
+            // Process the data for a 'wet' sensor
+            let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
+
+            // Ensure your chart creation logic is correct
+            createChart(`humidity-chart-${floorNumber}-${sensorName}`, 'Humidity', humidityData);
+
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+    }
+}
+
+function startDataUpdate(sensorName, floorNumber, sensorType) {
+    setInterval(() => {
+        fetchSensorDataAndRenderCharts(sensorName, floorNumber, sensorType);
+    }, 60000); // 60000 мс = 1 минута
+}
+
+// Вызов функции для каждого датчика
+{% for floor in floors %}
+    {% for sensor in floor.sensors.all %}
+        fetchSensorDataAndRenderCharts('{{ sensor.name }}', '{{ floor.floor_number }}', '{{ sensor.sensor_type }}');
+        startDataUpdate('{{ sensor.name }}', '{{ floor.floor_number }}', '{{ sensor.sensor_type }}');
+    {% endfor %}
+{% endfor %}
+</script>
+
+
+{% endblock %}
+
+
+
+
+
+
+

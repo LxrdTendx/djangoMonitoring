@@ -1,17 +1,118 @@
-from django.shortcuts import render, redirect
+import pandas as pd
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 import os
 from django.conf import settings
-import re
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
-import json
+from django.http import JsonResponse, HttpResponse
 import psycopg2
 from .models import Floor, Sensor
-from django.views.decorators.csrf import csrf_exempt
+
+
+
+@login_required
+def download_data(request):
+    # Получение параметров из запроса
+    file_format = request.GET.get('format', 'csv')
+    date_range = request.GET.get('range', 'day')
+
+    # Загрузка данных для пользователя
+    sensors_data = load_sensor_data_for_user(request.user, date_range)
+
+    # Создание Excel или CSV на основе выбранного формата
+    if file_format == 'xlsx':
+        # Используем ExcelWriter для записи в разные листы
+        with pd.ExcelWriter('sensors_data.xlsx') as writer:
+            for sheet_name, data in sensors_data.items():
+                df = pd.DataFrame(data)
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+        with open('sensors_data.xlsx', 'rb') as excel:
+            response = HttpResponse(excel.read(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="sensors_data.xlsx"'
+        return response
+    else:
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+        response['Content-Disposition'] = 'attachment; filename="sensors_data.csv"'
+        # Для CSV выбираем первый набор данных (или другую логику)
+        first_sheet_name = next(iter(sensors_data))
+        df = pd.DataFrame(sensors_data[first_sheet_name])
+        df.to_csv(response, index=False, encoding='utf-8-sig')  # Кодировка
+        return response
+
+
+
+def load_sensor_data_for_user(user, date_range):
+    # Определите временной диапазон
+    now = timezone.now()
+    if date_range == 'day':
+        start_date = now - timedelta(days=1)
+    elif date_range == 'month':
+        start_date = now - timedelta(days=30)
+    else:  # 'year'
+        start_date = now - timedelta(days=365)
+
+    # Получите все этажи пользователя
+    floors = Floor.objects.filter(users=user).order_by('floor_number')
+
+    # Подготовьте словарь для данных
+    sensors_data = {}
+
+    # Используйте вашу конфигурацию для подключения к БД
+    conn = psycopg2.connect(
+        user='test',
+        password='sownh12345',
+        host='45.12.74.4',
+        port='5432',
+        database='postgres'
+    )
+    cur = conn.cursor()
+
+
+
+    # Извлеките данные для каждого датчика
+    for floor in floors:
+        for sensor in floor.sensors.all():
+
+            # Название листа (также используется как имя файла)
+            sheet_name = f"Этаж_{floor.floor_number}-{sensor.name}"
+            table_name = user.username  # Имя пользователя как имя таблиц
+            # Выполните запрос и сохраните результаты
+            params = (sensor.name, start_date.strftime('%Y-%m-%d'))
+
+            # Используйте их в запросе
+            cur.execute("""
+                SELECT date_of_take, time_of_take, temper, co2, wet 
+                FROM brb 
+                WHERE sensor_name = %s AND date_of_take >= %s
+                ORDER BY date_of_take DESC, time_of_take DESC
+            """, params)
+
+            rows = cur.fetchall()
+
+
+            # Компонуйте данные в словарь
+            sensor_data_list = [{
+                'Дата': row[0],
+                'Время': row[1],
+                'Температура': row[2],
+                'CO2': row[3],
+                'Влажность': row[4]
+            } for row in rows]
+
+            # Добавьте данные в словарь для данного листа
+            sensors_data[sheet_name] = sensor_data_list
+
+    conn.close()
+    return sensors_data
+
+
+
+
+
 
 @login_required
 def get_sensor_data(request, sensor_name, username):
@@ -69,7 +170,19 @@ def get_sensor_data_history(request, sensor_name, username):
     )
 
     cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC", (sensor_name,))
+
+    # Получаем тип датчика
+    cur.execute(f"SELECT sensor_type FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 1", (sensor_name,))
+    sensor_type_result = cur.fetchone()
+    sensor_type = sensor_type_result[0] if sensor_type_result else None
+
+    # Формируем запрос в зависимости от типа датчика
+    if sensor_type == 'wet':
+        query = f"SELECT * FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 50"
+    else:  # Для mult или других типов
+        query = f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC LIMIT 25"
+
+    cur.execute(query, (sensor_name,))
     rows = cur.fetchall()
 
     data = []
@@ -83,13 +196,17 @@ def get_sensor_data_history(request, sensor_name, username):
             'humidity': row[5],
             'time': row[6],
             'date': row[7],
-
         })
 
     conn.close()
     data.reverse()
 
     return JsonResponse(data, safe=False)
+
+@login_required
+def monitoring_view(request):
+    floors = Floor.objects.filter(users=request.user).order_by('floor_number').prefetch_related('sensors')
+    return render(request, 'many_monitoring.html', {'floors': floors})
 
 def login_view(request):
     if request.method == 'POST':
