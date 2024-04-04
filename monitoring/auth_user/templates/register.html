@@ -29,6 +29,8 @@
       line-height: normal;
     }
     label{
+      display: block;
+      width: 181px;
       color: #FFF;
       font-family: Inter, sans-serif;
       font-size: 16px;
@@ -51,9 +53,9 @@
       background: #1F1F20;
     }
     .form{
-      margin-top: 70px;
+      margin-top: 40px;
       margin-left: 25px;
-      padding-bottom: 40px;
+      padding-bottom: 20px;
     }
     .login_button{
       margin-left: 22%;
@@ -113,23 +115,35 @@
         color: white;
         transition: 0.6s;
     }
+    .helptext, ul.errorlist, ul {
+      display: none;
+    }
+    #helpinfo {
+        display: block;
+        color: red;
+        width: 600px;
+        margin: auto;
+        margin-top: 50px;
+        font-family: Inter,sans-serif;
+        font-size: 16px;
+    }
 
 
   </style>
 
 
-  <div class="auth_block" style="height: 400px;width: 600px; margin:auto; margin-top: 10%">
+<div class="auth_block" style="height: 400px;width: 600px; margin:auto; margin-top: 10%">
     <div style="display: flex;">
       <img src="{% static 'LeftSection.png'%}">
       <div class="enter_block">
-          <h2 style="">LOG IN</h2>
+          <h2 style="">REGISTRATION</h2>
           <form method="post" class="form">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="login_button">Login</button>
+            <button type="submit" class="login_button">Регистрация</button>
 
           </form>
-          <a class="register_button" href="{% url 'register' %}">Регистрация</a>
+          <a class="register_button" href="{% url 'login' %}">Авторизация</a>
       </div>
 
 
@@ -137,14 +151,50 @@
 
   </div>
 
+<div id="helpinfo" style="color: red;"></div>
 
 
+<script>
+function togglePasswordVisibility() {
+  var passwordFields = document.querySelectorAll('.password-toggle');
+  passwordFields.forEach(function(field) {
+    if (field.type === "password") {
+      field.type = "text";
+    } else {
+      field.type = "password";
+    }
+  });
+}
+</script>
 
-  {% for field in form %}
-    {% if field.errors %}
-      <div class="alert alert-danger">
-        {{ field.errors }}
-      </div>
-    {% endif %}
-  {% endfor %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Копирование текста из helptext и вставка его в helpinfo
+  const helpTexts = document.querySelectorAll('.helptext');
+  helpTexts.forEach(function(el) {
+    const text = el.innerText;
+    if (text) {
+      const node = document.createElement("DIV");
+      node.textContent = text;
+      document.getElementById('helpinfo').appendChild(node);
+    }
+  });
+
+  // Копирование текста из элементов списка ошибок и вставка его в helpinfo
+  const errorLists = document.querySelectorAll('ul.errorlist');
+  errorLists.forEach(function(list) {
+    const items = list.querySelectorAll('li');
+    items.forEach(function(item) {
+      const text = item.innerText;
+      if (text) {
+        const node = document.createElement("DIV");
+        node.textContent = text;
+        document.getElementById('helpinfo').appendChild(node);
+      }
+    });
+  });
+});
+</script>
+
+
 {% endblock %}

@@ -11,8 +11,37 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 import psycopg2
 from .models import Floor, Sensor
+from .forms import RegisterForm
+from django.db import connection
+from .models import User
 
-
+def register_view(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Определение имени таблицы на основе ID пользователя
+            table_name = f"{user.username}"
+            # Создание подключения к базе данных
+            conn = psycopg2.connect(
+                user='test',
+                password='sownh12345',
+                host='45.12.74.4',
+                port='5432',
+                database='postgres'
+            )
+            cur = conn.cursor()
+            # Запрос на создание новой таблицы без данных (структура копируется из существующей таблицы)
+            # Замените 'your_table_name' на имя вашей исходной таблицы
+            cur.execute(f"CREATE TABLE {table_name} AS SELECT * FROM sownh WHERE 1=0;")
+            # Закрытие соединения
+            conn.commit()
+            cur.close()
+            conn.close()
+            return redirect('login')
+    else:
+        form = RegisterForm()
+    return render(request, 'register.html', {'form': form})
 
 @login_required
 def download_data(request):

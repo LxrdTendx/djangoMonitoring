@@ -428,6 +428,38 @@
         }
       }
 
+    .side-section-collapsed {
+      width: 0;
+      opacity: 0;
+      display: none;
+      overflow: hidden;
+      transition: width 0.3s ease-out, opacity 0.3s ease-out;
+    }
+
+    .toggle-arrow {
+      opacity: 30%;
+      margin-top: 375px;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      background: #1F1F20;
+      color: #383639;
+      text-align: center;
+      line-height: 30px;
+      font-size: 20px;
+      transform: rotate(180deg);
+      transition: transform 0.3s ease-out;
+      border-radius: 30px;
+    }
+    .toggle-arrow:hover{
+      opacity: 100%;
+      color: #009FE3;
+      transition: 0.6s;
+    }
+
+    .toggle-arrow.collapsed {
+      transform: rotate(0deg); /* Стрелка вправо */
+    }
 
 
 
@@ -460,6 +492,10 @@
       </a>
 
     </div>
+
+    <div class="toggle-arrow" id="toggleArrow">&#10148;</div>
+
+
     <div>
       <div id="floor-container" >
         <div id="information-blocks" style="display: flex; margin-top: 46px">
@@ -514,11 +550,7 @@
 
 
       </div>
-      <div id="statistic" style="zoom:133%; display: none">
 
-<!--        <input type="text" id="floorInput" placeholder="Введите номер этажа">-->
-<!--        <button id="filterButton">Фильтровать</button>-->
-      </div>
       <div id="thumbnails-container" style="display: none;">
           {% for floor in floors %}
               <button class="thumbnail-button" data-floor-number="{{ floor.floor_number }}">
@@ -540,6 +572,19 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+
+
+
+<script>
+  document.getElementById('toggleArrow').addEventListener('click', function() {
+  var sideSection = document.querySelector('.side-section');
+  var arrow = document.getElementById('toggleArrow');
+
+  // Переключаем класс для сайдбара и стрелки
+  sideSection.classList.toggle('side-section-collapsed');
+  arrow.classList.toggle('collapsed');
+});
+</script>
 
 
 <script>
