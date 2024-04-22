@@ -32,7 +32,6 @@ def register_view(request):
             )
             cur = conn.cursor()
             # Запрос на создание новой таблицы без данных (структура копируется из существующей таблицы)
-            # Замените 'your_table_name' на имя вашей исходной таблицы
             cur.execute(f"CREATE TABLE {table_name} AS SELECT * FROM sownh WHERE 1=0;")
             # Закрытие соединения
             conn.commit()

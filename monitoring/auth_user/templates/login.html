@@ -4,6 +4,10 @@
 
 
   <style>
+    body{
+      margin: 0;
+      padding: 0;
+    }
     input{
       all: unset;
       width: 250px;
@@ -113,31 +117,61 @@
         color: white;
         transition: 0.6s;
     }
+    #vanta-bg {
+      background-color: transparent;
+    }
 
 
   </style>
 
 
-  <div class="auth_block" style="height: 400px;width: 600px; margin:auto; margin-top: 10%">
-    <div style="display: flex;">
-      <img src="{% static 'LeftSection.png'%}">
-      <div class="enter_block">
-          <h2 style="">LOG IN</h2>
-          <form method="post" class="form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="login_button">Login</button>
+  <div id="vanta-bg" style="width: 100%; height: 100vh; position: relative;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10;">
+     <div class="auth_block" style="height: 400px;width: 600px; margin:auto; margin-top: 10%">
+      <div style="display: flex;">
+        <img src="{% static 'LeftSection.png'%}">
+        <div class="enter_block">
+            <h2 style="">LOG IN</h2>
+            <form method="post" class="form">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit" class="login_button">Login</button>
 
-          </form>
-          <a class="register_button" href="{% url 'register' %}">Регистрация</a>
+            </form>
+            <a class="register_button" href="{% url 'register' %}">Регистрация</a>
+        </div>
+
+
       </div>
 
-
     </div>
-
+    </div>
   </div>
 
 
+
+<script src="{% static 'js/three.min.js' %}"></script>
+<script src="{% static 'js/vanta.net.min.js' %}"></script>
+<script>
+window.addEventListener('DOMContentLoaded', (event) => {
+  VANTA.NET({
+    el: "#vanta-bg",
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    color: 0x009FE3,
+    backgroundColor: 0xffffff,
+    points: 10.00,
+    maxDistance: 40.00,
+    spacing: 25.00,
+    showDots: true
+  })
+});
+</script>
 
 
   {% for field in form %}
