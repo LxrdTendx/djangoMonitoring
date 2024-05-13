@@ -461,7 +461,7 @@
     }
 
     .toggle-arrow {
-        opacity: 30%;
+        opacity: 70%;
       margin-top: 375px;
       cursor: pointer;
       width: 30px;
@@ -595,23 +595,44 @@ function downloadData() {
 
 <script>
 window.charts = {};
-function updateOrCreateChart(chartInstance, chartId, label, data) {
+function updateOrCreateChart(chartInstance, chartId, label, data, chartType) {
     if (chartInstance) {
         chartInstance.destroy(); // Уничтожаем предыдущий график
     }
-    return createChart(chartId, label, data); // Создаем новый график
+    return createChart(chartId, label, data, chartType); // Создаем новый график
 }
-function createChart(chartId, label, data) {
+function createChart(chartId, label, data, chartType) {
     var ctx = document.getElementById(chartId).getContext('2d');
-    window.charts[chartId] = new Chart(ctx, {
+    var backgroundColor, borderColor;
+    console.log(chartType)
+    // Определяем цвета в зависимости от типа графика
+    switch (chartType) {
+        case 'temperature':
+            backgroundColor = 'rgba(255, 99, 132, 0.2)';
+            borderColor = 'rgba(255, 99, 132, 1)';
+            break;
+        case 'co2':
+            backgroundColor = 'rgba(75, 192, 192, 0.2)';
+            borderColor = 'rgba(75, 192, 192, 1)';
+            break;
+        case 'humidity':
+            backgroundColor = 'rgba(54, 162, 235, 0.2)';
+            borderColor = 'rgba(54, 162, 235, 1)';
+            break;
+        default:
+            backgroundColor = 'rgba(201, 203, 207, 0.2)';
+            borderColor = 'rgba(201, 203, 207, 1)';
+    }
+
+    return new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.map(d => d.time),
             datasets: [{
                 label: label,
                 data: data.map(d => d.value),
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
                 borderWidth: 1
             }]
         },
@@ -623,7 +644,6 @@ function createChart(chartId, label, data) {
             }
         }
     });
-    return window.charts[chartId];
 }
 async function fetchSensorDataAndRenderCharts(sensorName, floorNumber, sensorType) {
     try {
@@ -655,9 +675,9 @@ async function fetchSensorDataAndRenderCharts(sensorName, floorNumber, sensorTyp
             let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
 
             // Ensure your chart creation logic is correct
-            createChart(`temperature-chart-${floorNumber}-${sensorName}`, 'Temperature', temperatureData);
-            createChart(`co2-chart-${floorNumber}-${sensorName}`, 'CO2', co2Data);
-            createChart(`humidity-chart-${floorNumber}-${sensorName}`, 'Humidity', humidityData);
+            createChart(`temperature-chart-${floorNumber}-${sensorName}`, 'Temperature', temperatureData, 'temperature');
+            createChart(`co2-chart-${floorNumber}-${sensorName}`, 'CO2', co2Data, 'co2');
+            createChart(`humidity-chart-${floorNumber}-${sensorName}`, 'Humidity', humidityData, 'humidity');
         } else if (sensorType === 'wet') {
             // Process the data for a 'wet' sensor
             let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));

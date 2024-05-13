@@ -437,7 +437,7 @@
     }
 
     .toggle-arrow {
-      opacity: 30%;
+      opacity: 70%;
       margin-top: 375px;
       cursor: pointer;
       width: 30px;
@@ -460,6 +460,13 @@
     .toggle-arrow.collapsed {
       transform: rotate(0deg); /* Стрелка вправо */
     }
+    .body-critical {
+      box-shadow: inset 0 0 250px 0 rgba(255, 0, 0, 0.3);
+      transition: all 2s
+  }
+
+
+
 
 
 
@@ -592,14 +599,35 @@ let temperatureChart;
 let co2Chart;
 let humidityChart;
 let activeSensorName = null;
-function updateOrCreateChart(chartInstance, chartId, label, data) {
+function updateOrCreateChart(chartInstance, chartId, label, data, chartType) {
     if (chartInstance) {
         chartInstance.destroy(); // Уничтожаем предыдущий график
     }
-    return createChart(chartId, label, data); // Создаем новый график
+    return createChart(chartId, label, data, chartType); // Создаем новый график
 }
-function createChart(chartId, label, data) {
+function createChart(chartId, label, data, chartType) {
     var ctx = document.getElementById(chartId).getContext('2d');
+    var backgroundColor, borderColor;
+    console.log(chartType)
+    // Определяем цвета в зависимости от типа графика
+    switch (chartType) {
+        case 'temperature':
+            backgroundColor = 'rgba(255, 99, 132, 0.2)';
+            borderColor = 'rgba(255, 99, 132, 1)';
+            break;
+        case 'co2':
+            backgroundColor = 'rgba(75, 192, 192, 0.2)';
+            borderColor = 'rgba(75, 192, 192, 1)';
+            break;
+        case 'humidity':
+            backgroundColor = 'rgba(54, 162, 235, 0.2)';
+            borderColor = 'rgba(54, 162, 235, 1)';
+            break;
+        default:
+            backgroundColor = 'rgba(201, 203, 207, 0.2)';
+            borderColor = 'rgba(201, 203, 207, 1)';
+    }
+
     return new Chart(ctx, {
         type: 'line',
         data: {
@@ -607,8 +635,8 @@ function createChart(chartId, label, data) {
             datasets: [{
                 label: label,
                 data: data.map(d => d.value),
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
                 borderWidth: 1
             }]
         },
@@ -633,14 +661,14 @@ function updateSensorData(sensorName) {
             let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
 
             // Обновляем или создаем графики для всех параметров
-            temperatureChart = updateOrCreateChart(temperatureChart, 'temperatureChart', 'Temperature', temperatureData);
-            co2Chart = updateOrCreateChart(co2Chart, 'co2Chart', 'CO2', co2Data);
-            humidityChart = updateOrCreateChart(humidityChart, 'humidityChart', 'Humidity', humidityData);
+            temperatureChart = updateOrCreateChart(temperatureChart, 'temperatureChart', 'Temperature', temperatureData, 'temperature');
+            co2Chart = updateOrCreateChart(co2Chart, 'co2Chart', 'CO2', co2Data, 'co2');
+            humidityChart = updateOrCreateChart(humidityChart, 'humidityChart', 'Humidity', humidityData, 'humidity');
         } else if (sensorType === 'wet') {
             let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
 
             // Создаем или обновляем только график влажности
-            humidityChart = updateOrCreateChart(humidityChart, 'humidityChart', 'Humidity', humidityData);
+            humidityChart = updateOrCreateChart(humidityChart, 'humidityChart', 'Humidity', humidityData, 'humidity');
 
             // Уничтожаем ненужные графики, если они существуют
             if (temperatureChart) temperatureChart.destroy();
@@ -835,14 +863,28 @@ setInterval(() => {
 <script>
 function updateSensorDisplay(sensorName, isCritical) {
     let sensorElements = document.querySelectorAll(`[title="${sensorName}"]`);
+    let body = document.body;
     sensorElements.forEach(sensorElement => {
         if (isCritical) {
             sensorElement.classList.add('critical-sensor');
+            body.classList.add('critical-animation');
         } else {
             sensorElement.classList.remove('critical-sensor');
+            // body.classList.remove('critical-animation');
         }
     });
 }
+
+function updateBodyStyle(addStyle) {
+    const body = document.body;
+    if (addStyle) {
+        body.classList.add('body-critical');
+        setTimeout(() => {
+            body.classList.remove('body-critical');
+        }, 10000); // Удаление стиля через 10 секунд
+    }
+}
+
 function checkForCriticalValues() {
     fetch('/get_floors_and_sensors/')
       .then(response => response.json())
@@ -890,6 +932,7 @@ function checkForCriticalValues() {
                       let timeStr = currentTime.getHours() + ":" + currentTime.getMinutes() + ":" + currentTime.getSeconds();
                       errorItem.innerText = `${sensor['name']} на этаже ${floorNum} в ${timeStr} критичные показатели: ${criticalParameters.join(', ')}`;
                       errorBlock.prepend(errorItem);
+                      updateBodyStyle(true);
                   }
                   else {
                       updateSensorDisplay(sensor['name'], false); // Вызываем функцию с false, если критических показателей нет
