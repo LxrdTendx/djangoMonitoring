@@ -200,15 +200,15 @@ def get_sensor_data_history(request, sensor_name, username):
     cur = conn.cursor()
 
     # Получаем тип датчика
-    cur.execute(f"SELECT sensor_type FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 1", (sensor_name,))
+    cur.execute(f"SELECT sensor_type FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC ", (sensor_name,))
     sensor_type_result = cur.fetchone()
     sensor_type = sensor_type_result[0] if sensor_type_result else None
 
     # Формируем запрос в зависимости от типа датчика
     if sensor_type == 'wet':
-        query = f"SELECT * FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC LIMIT 50"
+        query = f"SELECT * FROM {table_name} WHERE sensor_name = %s ORDER BY date_of_take DESC, time_of_take DESC "
     else:  # Для mult или других типов
-        query = f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC LIMIT 25"
+        query = f"SELECT * FROM {table_name} WHERE sensor_name = %s AND temper != 0 AND co2 != 0 AND wet != 0 ORDER BY date_of_take DESC, time_of_take DESC"
 
     cur.execute(query, (sensor_name,))
     rows = cur.fetchall()
@@ -228,7 +228,6 @@ def get_sensor_data_history(request, sensor_name, username):
 
     conn.close()
     data.reverse()
-
     return JsonResponse(data, safe=False)
 
 @login_required

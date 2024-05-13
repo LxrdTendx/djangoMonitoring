@@ -604,7 +604,6 @@ function updateOrCreateChart(chartInstance, chartId, label, data, chartType) {
 function createChart(chartId, label, data, chartType) {
     var ctx = document.getElementById(chartId).getContext('2d');
     var backgroundColor, borderColor;
-    console.log(chartType)
     // Определяем цвета в зависимости от типа графика
     switch (chartType) {
         case 'temperature':
@@ -623,6 +622,9 @@ function createChart(chartId, label, data, chartType) {
             backgroundColor = 'rgba(201, 203, 207, 0.2)';
             borderColor = 'rgba(201, 203, 207, 1)';
     }
+    // Рассчитываем максимальное значение для оси Y
+    const maxValue = Math.max(...data.map(d => d.value));
+    const yAxisMax = maxValue + (maxValue * 0.3); // Добавляем 10% отступа
 
     return new Chart(ctx, {
         type: 'line',
@@ -639,52 +641,39 @@ function createChart(chartId, label, data, chartType) {
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    suggestedMax: yAxisMax
                 }
             }
         }
     });
 }
+
+
 async function fetchSensorDataAndRenderCharts(sensorName, floorNumber, sensorType) {
     try {
         const response = await fetch(`/get_sensor_data_history/${sensorName}/{{ request.user.username }}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-
+        let data = await response.json();
+        data = data.slice(-50);
 
         let tempChartId = `temperature-chart-${floorNumber}-${sensorName}`;
         let co2ChartId = `co2-chart-${floorNumber}-${sensorName}`;
         let humidityChartId = `humidity-chart-${floorNumber}-${sensorName}`;
 
-        if (window.charts[tempChartId]) {
-            window.charts[tempChartId].destroy();
-        }
-        if (window.charts[co2ChartId]) {
-            window.charts[co2ChartId].destroy();
-        }
-        if (window.charts[humidityChartId]) {
-            window.charts[humidityChartId].destroy();
-        }
-
         if (sensorType === 'mult') {
-            // Process the data for a 'mult' sensor
             let temperatureData = data.map(item => ({ time: item.time, value: item.temperature }));
             let co2Data = data.map(item => ({ time: item.time, value: item.co2 }));
             let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
 
-            // Ensure your chart creation logic is correct
-            createChart(`temperature-chart-${floorNumber}-${sensorName}`, 'Temperature', temperatureData, 'temperature');
-            createChart(`co2-chart-${floorNumber}-${sensorName}`, 'CO2', co2Data, 'co2');
-            createChart(`humidity-chart-${floorNumber}-${sensorName}`, 'Humidity', humidityData, 'humidity');
+            window.charts[tempChartId] = updateOrCreateChart(window.charts[tempChartId], tempChartId, 'Temperature', temperatureData, 'temperature');
+            window.charts[co2ChartId] = updateOrCreateChart(window.charts[co2ChartId], co2ChartId, 'CO2', co2Data, 'co2');
+            window.charts[humidityChartId] = updateOrCreateChart(window.charts[humidityChartId], humidityChartId, 'Humidity', humidityData, 'humidity');
         } else if (sensorType === 'wet') {
-            // Process the data for a 'wet' sensor
             let humidityData = data.map(item => ({ time: item.time, value: item.humidity }));
-
-            // Ensure your chart creation logic is correct
-            createChart(`humidity-chart-${floorNumber}-${sensorName}`, 'Humidity', humidityData);
-
+            window.charts[humidityChartId] = updateOrCreateChart(window.charts[humidityChartId], humidityChartId, 'Humidity', humidityData, 'humidity');
         }
     } catch (error) {
         console.error('Fetch error:', error);
@@ -697,13 +686,15 @@ function startDataUpdate(sensorName, floorNumber, sensorType) {
     }, 60000); // 60000 мс = 1 минута
 }
 
-// Вызов функции для каждого датчика
-{% for floor in floors %}
-    {% for sensor in floor.sensors.all %}
-        fetchSensorDataAndRenderCharts('{{ sensor.name }}', '{{ floor.floor_number }}', '{{ sensor.sensor_type }}');
-        startDataUpdate('{{ sensor.name }}', '{{ floor.floor_number }}', '{{ sensor.sensor_type }}');
+document.addEventListener('DOMContentLoaded', function () {
+    // Вызовы функций инициализации графиков
+    {% for floor in floors %}
+        {% for sensor in floor.sensors.all %}
+            fetchSensorDataAndRenderCharts('{{ sensor.name }}', '{{ floor.floor_number }}', '{{ sensor.sensor_type }}');
+            startDataUpdate('{{ sensor.name }}', '{{ floor.floor_number }}', '{{ sensor.sensor_type }}');
+        {% endfor %}
     {% endfor %}
-{% endfor %}
+});
 </script>
 
 
