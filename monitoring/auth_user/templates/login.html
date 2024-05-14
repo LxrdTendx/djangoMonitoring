@@ -14,7 +14,7 @@
       height: 30px;
       flex-shrink: 0;
       border-radius: 5px;
-      background: var(--main-grey, #383639);
+      background: #fff;
       font-size: 16px;
     }
 
@@ -95,7 +95,7 @@
       margin-top: 50px;
     }
     html {
-	  background: #383639;
+	  background: #fff;
     }
     li{
       color: red;
@@ -125,7 +125,7 @@
   </style>
 
 
-  <div id="vanta-bg" style="width: 100%; height: 100vh; position: relative;">
+  <div id="vanta-bg" style="width: 100%; height: 83vh; position: relative;">
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10;">
      <div class="auth_block" style="height: 400px;width: 600px; margin:auto; margin-top: 10%">
       <div style="display: flex;">
@@ -135,7 +135,7 @@
             <form method="post" class="form">
               {% csrf_token %}
               {{ form.as_p }}
-              <button type="submit" class="login_button">Login</button>
+              <button type="submit" class="login_button">Вход</button>
 
             </form>
             <a class="register_button" href="{% url 'register' %}">Регистрация</a>
